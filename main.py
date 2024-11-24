@@ -161,7 +161,7 @@ def add_log(equipment_id):
         cursor.execute("SELECT AlertID FROM ALERTS ORDER BY AlertID DESC LIMIT 1")
         result = cursor.fetchone()
         latest_alert_id = result['AlertID'] if result else None
-        new_alert_id = increment_id(latest_alert_id)
+        new_alert_id = increment_id("A", latest_alert_id)
         TimeStamp = datetime.now()
         cursor.close()
 
@@ -176,7 +176,7 @@ def add_log(equipment_id):
         cursor.execute("SELECT AlertID FROM ALERTS ORDER BY AlertID DESC LIMIT 1")
         result = cursor.fetchone()
         latest_alert_id = result['AlertID'] if result else None
-        new_alert_id = increment_id(latest_alert_id)
+        new_alert_id = increment_id("A", latest_alert_id)
 
         cursor.execute("SELECT OperatorID, EquipmentID FROM OPERATES WHERE OperatorID = %s AND EquipmentID = %s", (OperatorID, equipment_id))
         operates_check = cursor.fetchone()
@@ -199,7 +199,7 @@ def company_entry():
         cursor.execute('SELECT CompanyID FROM COMPANY ORDER BY CompanyID DESC LIMIT 1')
         result = cursor.fetchone()
         latest_company_id = result['CompanyID'] if result else None
-        new_company_id = increment_id(latest_company_id)
+        new_company_id = increment_id("C", latest_company_id)
         cursor.close()
         
         return render_template('forms/company.html', latest_company_id=new_company_id)
@@ -213,7 +213,7 @@ def company_entry():
         cursor.execute("SELECT CompanyID FROM COMPANY ORDER BY CompanyID DESC LIMIT 1")
         result = cursor.fetchone()
         latest_company_id = result['CompanyID'] if result else None
-        new_company_id = increment_id(latest_company_id)
+        new_company_id = increment_id("C", latest_company_id)
 
         cursor.execute("INSERT INTO COMPANY VALUES(%s,%s,%s,%s)",(new_company_id,CompanyName, Location, Contact))
         mysql.connection.commit()
@@ -244,7 +244,7 @@ def equipments_entry():
         cursor.execute("SELECT EquipmentID FROM EQUIPMENTS ORDER BY EquipmentID DESC LIMIT 1")
         result = cursor.fetchone()
         latest_equipment_id = result['EquipmentID'] if result else None
-        new_equipment_id = increment_id(latest_equipment_id)
+        new_equipment_id = increment_id("E", latest_equipment_id)
 
         cursor.execute("SELECT CompanyID FROM COMPANY")
         result = cursor.fetchall()
@@ -264,7 +264,7 @@ def equipments_entry():
         cursor.execute("SELECT EquipmentID FROM EQUIPMENTS ORDER BY EquipmentID DESC LIMIT 1")
         result = cursor.fetchone()
         latest_equipment_id = result['EquipmentID'] if result else None
-        new_equipment_id = increment_id(latest_equipment_id)
+        new_equipment_id = increment_id("E", latest_equipment_id)
 
         cursor.execute(" INSERT INTO EQUIPMENTS VALUES(%s,%s,%s,%s,%s)",(new_equipment_id, EquipmentName, PowerRating, ManufacturingDate, CompanyID))
         mysql.connection.commit()
@@ -295,7 +295,7 @@ def operators_entry():
         cursor.execute("SELECT OperatorID FROM OPERATORS ORDER BY OperatorID DESC LIMIT 1")
         result = cursor.fetchone()
         latest_operator_id = result['OperatorID'] if result else None
-        new_opeator_id = increment_id(latest_operator_id)
+        new_opeator_id = increment_id("O", latest_operator_id)
         
         cursor.execute("SELECT CompanyID FROM COMPANY")
         result = cursor.fetchall()
@@ -315,7 +315,7 @@ def operators_entry():
         cursor.execute("SELECT OperatorID FROM OPERATORS ORDER BY OperatorID DESC LIMIT 1")
         result = cursor.fetchone()
         latest_operator_id = result['OperatorID'] if result else None
-        new_opeator_id = increment_id(latest_operator_id)
+        new_opeator_id = increment_id("O", latest_operator_id)
 
         cursor.execute("INSERT INTO OPERATORS VALUES(%s,%s,%s,%s,%s)",(new_opeator_id, OperatorName, Occuption, PhoneNumber, CompanyID))
         mysql.connection.commit()
@@ -338,9 +338,8 @@ def display_operators_data():
         return "Error fetching data. Please check the console for details."
 
 # Function to increment the retrieved IDs
-def increment_id(id):
-    if id:
-        prefix = id[:-3]
+def increment_id(prefix, id):
+    if id is not None:
         num = id[-3:]
 
         num = int(num) + 1
@@ -348,7 +347,7 @@ def increment_id(id):
 
         return prefix + num
     
-    return '001'
+    return prefix + '001'
 
 if __name__ == '__main__':
     app.run(host='localhost', port=5000, debug=True)
