@@ -1,14 +1,13 @@
 from flask import Flask, render_template, request, redirect
 from flask_mysqldb import MySQL
 from datetime import datetime
-from config import password
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "--------"
 app.config['MYSQL_DB'] = "dbms_mp_1"
 app.config['MYSQL_HOST'] = "localhost"
 app.config['MYSQL_USER'] = "root"
-app.config['MYSQL_PASSWORD'] = password
+app.config['MYSQL_PASSWORD'] = ""
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 mysql = MySQL(app)
 
@@ -340,13 +339,16 @@ def display_operators_data():
 
 # Function to increment the retrieved IDs
 def increment_id(id):
-    prefix = id[:-3]
-    num = id[-3:]
+    if id:
+        prefix = id[:-3]
+        num = id[-3:]
 
-    num = int(num) + 1
-    num = str(num).zfill(3)
+        num = int(num) + 1
+        num = str(num).zfill(3)
 
-    return prefix + num
+        return prefix + num
+    
+    return '001'
 
 if __name__ == '__main__':
     app.run(host='localhost', port=5000, debug=True)
