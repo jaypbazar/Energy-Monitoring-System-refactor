@@ -1,33 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy Monitoring System</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-    <div class="bg-image"></div>
-    <h1 style="margin-top: 3rem;">Energy Monitoring System</h1>
-    <div class="home-nav">
-        <form class="search-bar" method="GET" action="/search_equipment">
-            <div>
-                <input type="text" name="equipment_name" placeholder="Search for Equipment">
-                <button type="submit" name="search-button">
-                    <img src="/static/images/search.svg" alt="Search icon">
-                </button>
-            </div>
-        </form>
-        <button class="add-new" onclick="window.location.href='/add_new'">ADD NEW</button>
+{% extends "base.html" %}
+
+{% block title %}Energy Monitoring System{% endblock title %}
+
+{% block style %}
+<link rel="stylesheet" href="../static/css/stylesheet-home.css">
+{% endblock style %}
+
+{% block content %}
+    <a type="button" href="/add_new" class="btn rounded-pill m-4 pt-0 position-fixed top-5 end-0" style="background-color: #ffab5d;">
+        <span class="fs-4">+ </span><span>Add New</span>
+    </a>
+    <div class="row justify-content-center my-5 py-5 text-center">
+        <a href='/equipment_overview' class="option-container col-2 p-3 m-3 rounded-4">
+            <img src="../static/images/logo-equipment.png" width="70%">
+            <hr>
+            <h4>Equipments</h4>
+        </a>
+        <a href='/display_operators' class="option-container col-2 p-3 m-3 rounded-4">
+            <img src="../static/images/logo-operator.png" width="70%">
+            <hr>
+            <h4>Operators</h4>
+        </a>
+        <a href='/display_energy_usage' class="option-container col-2 p-3 m-3 rounded-4">
+            <img src="../static/images/logo-energy-usage.png" width="70%">
+            <hr>
+            <h4>Energy Usage</h4>
+        </a>
+        <a href='/display_companies' class="option-container col-2 p-3 m-3 rounded-4">
+            <img src="../static/images/logo-company.png" width="70%">
+            <hr>
+            <h4>Companies</h4>
+        </a>        
     </div>
-    <div class="dashboard">
-        <div onclick="window.location.href='/equipment_overview'">Equipment Overview</div>
-        <div onclick="window.location.href='/display_operators'">Operators</div>
-        <div onclick="window.location.href='/display_energy_usage'">Energy Usage</div>
-        <div onclick="window.location.href='/display_companies'">List of Companies</div>
-    </div>
-</body>
-</html>
+{% endblock content %}

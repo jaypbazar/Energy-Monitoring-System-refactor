@@ -1,0 +1,11 @@
+.option-container {
+    background-color: #fcdbbc;
+    color: #000000;
+    width: 100%;
+    min-width: 10rem;
+    text-decoration: none;
+}
+
+.option-container:hover {
+    background-color: #ffab5d;
+}

@@ -2,6 +2,25 @@ from flask import Flask, render_template, request, redirect
 from flask_mysqldb import MySQL
 from datetime import datetime
 
+'''
+NOTES FROM CO-PROGRAMMER:
+    These are functionalities required to run the frontend properly.
+
+    TODO: add a '/login' route to process login
+
+    TODO: when logged in add session['user']=username
+    
+    TODO: redirect main('/') route to login when user not in session otherwise to home
+    
+    TODO: put all usernames in database to session['username_list'] for validation (cannot have same username)
+    
+    TODO: use flash in error messages (import flash from flask)
+          format: flash('<error message>', 'message type')
+          message types: 'success', 'danger', 'info'
+
+    TODO: check every route if there is session['user'], if none redirect to login
+
+'''
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "--------"
 app.config['MYSQL_DB'] = "dbms_mp_1"
@@ -350,4 +369,4 @@ def increment_id(prefix, id):
     return prefix + '001'
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

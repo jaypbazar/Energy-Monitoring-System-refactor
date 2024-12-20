@@ -2,9 +2,12 @@
 
 {% block title %}Sign Up{% endblock title %}
 
+{% block style %}
+{% endblock style %}
+
 {% block content %}
 <div class="d-flex justify-content-center">
-    <div class="container rounded-5 m-5 p-3" style="background-color: #fcdbbc60; width: 25rem;">
+    <div class="container rounded-5 m-4 p-3" style="background-color: #fcdbbc60; width: 25rem;">
         <form class="p-3" action="/signup" method="POST">
             <h3 class="text-center">Sign up</h3>
             <hr>
@@ -14,13 +17,21 @@
             </div>
             <div class="mb-3">
                 <label class="form-label mx-2" for="inputPassword">Password</label>
-                <input id="inputPassword" class="form-control rounded-pill" type="text" name="password" required>
+                <input id="inputPassword" class="form-control rounded-pill" type="password" name="password" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label mx-2" for="inputPassword">Re-enter Password</label>
+                <input id="inputPassword" class="form-control rounded-pill" type="password" name="password2" required>
             </div>
             <div class="my-4">
                 <button class="btn btn-dark rounded-pill w-100" type="submit">Register</button>
             </div>
-            <p class="text-center">Already have an account? <a href="/">Log in</a></p>
+            <p class="text-center">Already have an account? <a href="/login">Log in</a></p>
         </form>
     </div>
 </div>
+<script>
+    var usernames = '{{session.username_list}}';
+</script>
+<script src="../../static/js/validatePassword.js"></script>
 {% endblock content %}
