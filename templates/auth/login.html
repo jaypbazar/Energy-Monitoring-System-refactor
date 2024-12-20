@@ -2,6 +2,10 @@
 
 {% block title %}Login{% endblock title %}
 
+{% block style %}
+<link rel="stylesheet" href="../../static/css/stylesheet-login.css">
+{% endblock style %}
+
 {% block content %}
 <div class="d-flex justify-content-center">
     <div class="container rounded-5 m-5 p-3" style="background-color: #fcdbbc60; width: 25rem;">
@@ -10,11 +14,16 @@
             <hr>
             <div class="mb-3">
                 <label class="form-label mx-2" for="inputUsername">Username</label>
-                <input id="inputUsername" class="form-control rounded-pill" type="text" name="username" placeholder="Username" required>    
+                <input id="inputUsername" class="form-control rounded-pill" type="text" name="username" placeholder="Enter your username" required>    
             </div>
             <div class="mb-3">
                 <label class="form-label mx-2" for="inputPassword">Password</label>
-                <input id="inputPassword" class="form-control rounded-pill" type="password" name="password" placeholder="Password" required>
+                <div class="input-group border-1 rounded-pill bg-light">
+                    <input type="password" class="form-control bg-transparent border-0" id="inputPassword" name="password" placeholder="Enter your password" required>
+                    <button style="box-shadow: none;" class="btn btn-outline-secondary bg-transparent border-0 rounded-end" type="button" id="password-view-btn">
+                        <img src="../../static/images/eye_close.png" width="30" height="20">
+                    </button>
+                </div>
             </div>
             <div class="my-4">
                 <button class="btn btn-dark rounded-pill w-100" type="submit">Log in</button>
@@ -23,4 +32,6 @@
         </form>
     </div>
 </div>
+<script src="../../static/js/togglePasswordVisibility.js">
+</script>
 {% endblock content %}
