@@ -7,29 +7,173 @@
 {% endblock style %}
 
 {% block content %}
-    <a type="button" href="/add_new" class="btn rounded-pill m-4 pt-0 position-fixed top-5 end-0" style="background-color: #ffab5d;">
+    <!-- Add New Button -->
+    <button type="button" id="add_new_btn" class="btn rounded-pill m-4 pt-0 position-fixed top-5 end-0" 
+            style="background-color: #ffab5d;" 
+            data-bs-toggle="modal" 
+            data-bs-target="#addNewModal">
         <span class="fs-4">+ </span><span>Add New</span>
-    </a>
-    <div class="row justify-content-center my-5 py-5 text-center">
-        <a href='/equipment_overview' class="option-container col-2 p-3 m-3 rounded-4">
-            <img src="../static/images/logo-equipment.png" width="70%">
-            <hr>
-            <h4>Equipments</h4>
-        </a>
-        <a href='/display_operators' class="option-container col-2 p-3 m-3 rounded-4">
-            <img src="../static/images/logo-operator.png" width="70%">
-            <hr>
-            <h4>Operators</h4>
-        </a>
-        <a href='/display_energy_usage' class="option-container col-2 p-3 m-3 rounded-4">
-            <img src="../static/images/logo-energy-usage.png" width="70%">
-            <hr>
-            <h4>Energy Usage</h4>
-        </a>
-        <a href='/display_companies' class="option-container col-2 p-3 m-3 rounded-4">
-            <img src="../static/images/logo-company.png" width="70%">
-            <hr>
-            <h4>Companies</h4>
-        </a>        
+    </button>
+
+    <!-- Add New Modal -->
+    <div class="modal fade" id="addNewModal" tabindex="-1" aria-labelledby="addNewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-5 bg-warning-subtle">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <a href="/company" class="add-new-option rounded">
+                        <h5 class="mb-0">New Company</h5>
+                    </a>
+                    <a href="/equipments" class="add-new-option rounded">
+                        <h5 class="mb-0">New Equipment</h5>
+                    </a>
+                    <a href="/operators" class="add-new-option rounded">
+                        <h5 class="mb-0">New Operator</h5>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container" id="mainContainer">
+        <div class="options-grid row justify-content-center my-5 py-5 text-center" id="optionsGrid">
+            <div class="option-container col-2 p-3 m-3 rounded-4" data-content="equipment">
+                <img src="../static/images/logo-equipment.png" width="70%">
+                <hr>
+                <h4>Equipments</h4>
+            </div>
+            <div class="option-container col-2 p-3 m-3 rounded-4" data-content="operators">
+                <img src="../static/images/logo-operator.png" width="70%">
+                <hr>
+                <h4>Operators</h4>
+            </div>
+            <div class="option-container col-2 p-3 m-3 rounded-4" data-content="energy">
+                <img src="../static/images/logo-energy-usage.png" width="70%">
+                <hr>
+                <h4>Energy Usage</h4>
+            </div>
+            <div class="option-container col-2 p-3 m-3 rounded-4" data-content="companies">
+                <img src="../static/images/logo-company.png" width="70%">
+                <hr>
+                <h4>Companies</h4>
+            </div>
+        </div>
+
+        <!-- Equipment Content Area -->
+        <div class="content-area" id="equipmentContent">
+            <div class="table-container">
+                <h2 class="mb-4">Equipment Data</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Equipment ID</th>
+                            <th>Equipment Name</th>
+                            <th>Power Rating</th>
+                            <th>Manufacturing Date</th>
+                            <th>Company ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in equipment_data %}
+                        <tr>
+                            <td>{{ row.EquipmentID }}</td>
+                            <td>{{ row.EquipmentName }}</td>
+                            <td>{{ row.PowerRating }}</td>
+                            <td>{{ row.ManufacturingDate }}</td>
+                            <td>{{ row.CompanyID }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Operators Content Area -->
+        <div class="content-area" id="operatorsContent">
+            <div class="table-container">
+                <h2 class="mb-4">Operators Data</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Operator ID</th>
+                            <th>Operator Name</th>
+                            <th>Occupation</th>
+                            <th>Phone Number</th>
+                            <th>Company Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in operators_data %}
+                        <tr>
+                            <td>{{ row.OperatorID }}</td>
+                            <td>{{ row.OperatorName }}</td>
+                            <td>{{ row.Occupation }}</td>
+                            <td>{{ row.PhoneNumber }}</td>
+                            <td>{{ row.CompanyName }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Energy Usage Content Area -->
+        <div class="content-area" id="energyContent">
+            <div class="table-container">
+                <h2 class="mb-4">Energy Usage Data</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Equipment ID</th>
+                            <th>Equipment Name</th>
+                            <th>Energy Consumed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in energy_data %}
+                        <tr>
+                            <td>{{ row.EquipmentID }}</td>
+                            <td>{{ row.EquipmentName }}</td>
+                            <td>{{ row.EnergyConsumed }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Companies Content Area -->
+        <div class="content-area" id="companiesContent">
+            <div class="table-container">
+                <h2 class="mb-4">Company Data</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Company ID</th>
+                            <th>Company Name</th>
+                            <th>Location</th>
+                            <th>Contact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in company_data %}
+                        <tr>
+                            <td>{{ row.CompanyID }}</td>
+                            <td>{{ row.CompanyName }}</td>
+                            <td>{{ row.Location }}</td>
+                            <td>{{ row.Contact }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 {% endblock content %}
+
+{% block scripts %}
+<script src="../static/js/animate_options.js"></script>
+{% endblock scripts %}

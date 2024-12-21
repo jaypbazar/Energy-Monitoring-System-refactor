@@ -1,31 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Energy Monitoring System</title>
-        <link rel="stylesheet" href="/static/css/equip_detail.css">
-        <link rel="stylesheet" href="/static/css/style.css" />
-    </head>
-    <body>
-        <div class="home-page">
-            <img
-                src="/static/images/home.svg"
-                alt="Home Page"
-                style="scale: 1.5; margin: 0.5em 0.5em 0 0.5em; cursor: pointer"
-                onclick="window.location.href='/home'"
-            />
+{% extends "base.html" %}
+
+{% block title %}Search Results - Energy Monitoring System{% endblock title %}
+
+{% block style %}
+<link rel="stylesheet" href="../static/css/stylesheet-home.css">
+{% endblock style %}
+
+{% block content %}
+    <div class="container mt-5 pt-5">
+        <h2 class="text-center text-light mb-4">Search Results for: "{{ request.args.get('equipment_name') }}"</h2>
+        
+        <div class="row justify-content-center">
+            {% for equipment in equipments %}
+            <div class="col-md-5 m-3">
+                <div class="option-container p-4 rounded-4">
+                    <h4 class="mb-3">{{ equipment.EquipmentName }}</h4>
+                    <hr>
+                    <div class="text-start">
+                        <p><strong>Equipment ID:</strong> {{ equipment.EquipmentID }}</p>
+                        <p><strong>Company Name:</strong> {{ equipment.CompanyName }}</p>
+                        <p><strong>Power Rating:</strong> {{ equipment.PowerRating }}</p>
+                        <p><strong>Manufacturing Date:</strong> {{ equipment.ManufacturingDate }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
-        <h1>Searched for : "{{ request.args.get('equipment_name') }}" </h1>
-        {% for equipment in equipments %}
-        <div class="equip-info">
-            <div>{{ equipment.EquipmentName }}</div>
-            <div>Equipment ID : {{ equipment.EquipmentID }}</div>
-            <div>Company Name : {{ equipment.CompanyName }}</div>
-            <div>Power Rating : {{ equipment.PowerRating }}</div>
-            <div>Manufacturing Date : {{ equipment.ManufacturingDate }}</div>
-        </div>
-        <br/>
-        {% endfor %}
-    </body>
-</html>
+    </div>
+{% endblock content %}

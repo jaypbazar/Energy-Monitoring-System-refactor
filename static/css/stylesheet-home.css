@@ -8,4 +8,112 @@
 
 .option-container:hover {
     background-color: #ffab5d;
+    cursor: pointer;
+}
+
+#add_new_btn {
+    z-index: 9;
+}
+
+.add-new-option {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    padding: 1rem;
+    transition: background-color 0.3s;
+}
+
+.add-new-option:hover {
+    background-color: #ffab5d50;
+    color: inherit;
+}
+
+.main-container {
+    margin-top: 5%;
+    transition: all 0.5s ease;
+    min-height: 100vh;
+    position: relative;
+}
+
+.main-container.sidebar-active {
+    margin-left: 20%;
+}
+
+.options-grid {
+    transition: all 0.5s ease;
+    position: relative;
+}
+
+.options-grid.sidebar-mode {
+    position: fixed;
+    left: 0;
+    top: 0;
+    min-width: 10rem;
+    width: 20%;
+    height: 100vh;
+    background-color: #ffab5d4b;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.option-container {
+    transition: all 0.5s ease;
+    transform-origin: center;
+    cursor: pointer;
+}
+
+.options-grid.sidebar-mode .option-container {
+    transform: scale(0.7);
+    width: 100% !important;
+    margin: 0.5rem 0 !important;
+}
+
+.content-area {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 2rem;
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 80%;
+    max-width: 1200px;
+}
+
+.content-area.active {
+    display: block;
+    opacity: 1;
+}
+
+.table-container {
+    background-color: #ffffff8e;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+th {
+    background-color: #ffd6af;
+    color: black;
+}
+
+tr:hover {
+    background-color: #ffbb77;
+}
+
+.option-container.active {
+    background-color: #ffab5d;
 }
