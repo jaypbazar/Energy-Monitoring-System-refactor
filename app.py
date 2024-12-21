@@ -23,6 +23,9 @@ NOTES FROM CO-PROGRAMMER:
 
     [/]TODO: check every route if there is session['user'], if none redirect to login
 
+    [X]TODO: pass the data for equipments, operators, energy from the database to home
+
+
 '''
 
 '''
