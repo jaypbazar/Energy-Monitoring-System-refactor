@@ -138,15 +138,19 @@ def home_page():
 @app.route('/search_equipment', methods=['GET'])
 def search_equipment():
     equipment_name = request.args.get('equipment_name')
+    if equipment_name == '':
+        flash("Please enter a search query.", 'warning')
+        return redirect('/home')
 
-    equipment = mysql.queryGet('SELECT EQUIPMENTS.*, CompanyName FROM equipments, company WHERE EquipmentName = %s AND equipments.CompanyID=company.CompanyID', 
-                (equipment_name,)
+    equipments = mysql.queryGetAll('SELECT equipments.*, CompanyName FROM equipments, company WHERE EquipmentName LIKE %s AND equipments.CompanyID=company.CompanyID', 
+                ("%" + equipment_name + "%",)
                 )
 
-    if equipment == None:
-        return render_template('search_not_found.html')
+    if equipments == ():
+        flash(f"No equipment(s) found for search query: '{equipment_name}'.", 'info')
+        return redirect('/home')
     
-    return render_template('search_results.html', equipment=equipment)
+    return render_template('search_results.html', equipments=equipments)
 
 # Add New page rendering
 @app.route('/add_new')

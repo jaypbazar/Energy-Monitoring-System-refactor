@@ -16,12 +16,16 @@
                 onclick="window.location.href='/home'"
             />
         </div>
-        <h1>Search for : {{ equipment.EquipmentName }}</h1>
+        <h1>Searched for : "{{ request.args.get('equipment_name') }}" </h1>
+        {% for equipment in equipments %}
         <div class="equip-info">
+            <div>{{ equipment.EquipmentName }}</div>
             <div>Equipment ID : {{ equipment.EquipmentID }}</div>
             <div>Company Name : {{ equipment.CompanyName }}</div>
             <div>Power Rating : {{ equipment.PowerRating }}</div>
             <div>Manufacturing Date : {{ equipment.ManufacturingDate }}</div>
         </div>
+        <br/>
+        {% endfor %}
     </body>
 </html>
