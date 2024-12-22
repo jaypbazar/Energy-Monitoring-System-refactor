@@ -15,7 +15,7 @@
         <span class="fs-4">+ </span><span>Add New</span>
     </button>
 
-    <!-- Add New Modal -->
+    <!-- Add New Model -->
     <div class="modal fade" id="addNewModal" tabindex="-1" aria-labelledby="addNewModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-5 bg-warning-subtle">
@@ -154,7 +154,7 @@
     <!-- Main Content -->
     <div class="main-container" id="mainContainer">
         <div class="options-grid row justify-content-center my-5 py-5 text-center" id="optionsGrid">
-            <div class="option-container col-2 p-3 m-3 rounded-4" data-content="equipment">
+            <div class="option-container col-2 p-3 m-3 rounded-4" data-content="equipments">
                 <img src="../static/images/logo-equipment.png" width="70%">
                 <hr>
                 <h4>Equipments</h4>
@@ -177,7 +177,7 @@
         </div>
 
         <!-- Equipment Content Area -->
-        <div class="content-area" id="equipmentContent">
+        <div class="content-area" id="equipmentsContent">
             <div class="table-container">
                 <h2 class="mb-4">Equipment Data</h2>
                 <table>
@@ -190,17 +190,7 @@
                             <th>Company ID</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {% for row in equipment_data %}
-                        <tr>
-                            <td>{{ row.EquipmentID }}</td>
-                            <td>{{ row.EquipmentName }}</td>
-                            <td>{{ row.PowerRating }}</td>
-                            <td>{{ row.ManufacturingDate }}</td>
-                            <td>{{ row.CompanyID }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -219,17 +209,7 @@
                             <th>Company Name</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {% for row in operators_data %}
-                        <tr>
-                            <td>{{ row.OperatorID }}</td>
-                            <td>{{ row.OperatorName }}</td>
-                            <td>{{ row.Occupation }}</td>
-                            <td>{{ row.PhoneNumber }}</td>
-                            <td>{{ row.CompanyName }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -246,15 +226,7 @@
                             <th>Energy Consumed</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {% for row in energy_data %}
-                        <tr>
-                            <td>{{ row.EquipmentID }}</td>
-                            <td>{{ row.EquipmentName }}</td>
-                            <td>{{ row.EnergyConsumed }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -272,16 +244,7 @@
                             <th>Contact</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {% for row in company_data %}
-                        <tr>
-                            <td>{{ row.CompanyID }}</td>
-                            <td>{{ row.CompanyName }}</td>
-                            <td>{{ row.Location }}</td>
-                            <td>{{ row.Contact }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>

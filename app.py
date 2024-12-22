@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, flash, session
+from flask import Flask, render_template, request, redirect, flash, session, jsonify
 from datetime import datetime
 from database import MySQLDatabase
 '''
@@ -161,51 +161,55 @@ def add_new():
     return render_template('forms/add_new.html')
 
 # All Equipments Overview page rendering
-@app.route('/equipment_overview')
-def equipment_overview():
+@app.route('/fetch')
+def fetch():
     if request.method == 'GET':
-        equipments = mysql.queryGetAll(
-            'SELECT EquipmentID, EquipmentName FROM equipments'
-        )
+        match list(request.args.keys())[0]:
+            case 'equipments':
+                equipments = mysql.queryGetAll(
+                    'SELECT * FROM equipments'
+                )
 
-        return render_template('equipments/equipment_overview.html', equipments=equipments)
+                return jsonify(equipments)
+            
+            case 'operators':
+                operators = mysql.queryGetAll(
+                    "SELECT O.*, C.CompanyName FROM operators O, company C WHERE O.CompanyID=C.CompanyID;"
+                )
 
-# Display Logs
-@app.route('/logs')
-def display_logs():
-    if request.method == 'GET':
-        data = mysql.queryGetAll(
-            'SELECT A.*, E.EquipmentName, O.OperatorName FROM alerts A, equipments E, operators O WHERE A.EquipmentID=E.EquipmentID AND A.OperatorID=O.OperatorID;'
-        )
+                return jsonify(operators)
+            
+            case 'companies':
+                companies = mysql.queryGetAll(
+                    "SELECT * FROM company"
+                )
 
-        return render_template('display_data/display_alerts_data.html', data=data)
-   
-# Display Operators Table
-@app.route('/display_operators')
-def display_operators():
-    data = mysql.queryGetAll(
-        "SELECT O.*, C.CompanyName FROM operators O, company C WHERE O.CompanyID=C.CompanyID;"
-    )
-    
-    return render_template('display_data/display_operators_data.html', data=data)
+                return jsonify(companies)
+            
+            case 'energy':
+                energy_usage = mysql.queryGetAll(
+                    "SELECT E.EquipmentID, E.EquipmentName, SUM(A.EnergyConsumed) AS EnergyConsumed FROM alerts A , equipments E WHERE A.EquipmentID=E.EquipmentID GROUP BY E.EquipmentID;"
+                )
 
-# Display Energy Usage
-@app.route('/display_energy_usage')
-def display_energy_usage():
-    data = mysql.queryGetAll(
-        "SELECT E.EquipmentID, E.EquipmentName, SUM(A.EnergyConsumed) AS EnergyConsumed FROM alerts A , equipments E WHERE A.EquipmentID=E.EquipmentID GROUP BY E.EquipmentID;"
-    )
+                return jsonify(energy_usage)
 
-    return render_template('display_data/display_energy_usage.html', data=data)
+            case 'logs':
+                logs = mysql.queryGetAll(
+                    'SELECT A.*, E.EquipmentName, O.OperatorName FROM alerts A, equipments E, operators O WHERE A.EquipmentID=E.EquipmentID AND A.OperatorID=O.OperatorID;'
+                )
 
-# Display Companies
-@app.route('/display_companies')
-def display_companies():
-    data = mysql.queryGetAll(
-        "SELECT * FROM company"
-    )
+                return jsonify(logs)
+            
+            case 'operates':
+                operates = mysql.queryGetAll(
+                    "SELECT * FROM operates"
+                )
 
-    return render_template('display_data/display_company_data.html', data=data)
+                return jsonify(operates)
+
+            
+            case _:
+                return jsonify({'Error': 404, 'Reason': f"Unknown parameter '{list(request.args.keys())[0]}'"})
     
 # Selected Equipment Page rendering
 @app.route('/equipment_<equipment_id>', methods=['GET', 'POST'])
