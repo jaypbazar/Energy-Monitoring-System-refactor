@@ -151,6 +151,70 @@
         </div>
     </div>
 
+    <!-- Equipment Usage Modal -->
+    <div class="modal fade" id="equipmentUsageModal" tabindex="-1" aria-labelledby="equipmentUsageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-header" style="background-color: #ffab5d; color: #442c12;">
+                    <h5 class="modal-title" id="equipmentUsageModalLabel">Log Usage: <span id="equipmentNameSpan"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body" style="background-color: #fcdbbc; color: #442c12;">
+                    <form id="equipmentUsageForm" action="" method="POST">
+                        <div class="mb-3">
+                            <label for="OperatorID" class="form-label">Operator</label>
+                            <select class="form-select" name="OperatorID" id="OperatorID" required>
+                                <option value="" disabled>-- Select an Operator --</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="EnergyConsumed" class="form-label">Energy Consumed</label>
+                            <input type="text" class="form-control" name="EnergyConsumed" id="EnergyConsumed" placeholder="Enter Energy Consumed" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Time Stamp</label>
+                            <p class="form-control-plaintext" id="timeStamp"></p>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-dark rounded-pill" style="background-color: #fcdbbc; color: #442c12;" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn rounded-pill" style="background-color: #ffab5d; color: #442c12;">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equipment Logs Modal -->
+    <div class="modal fade" id="equipmentLogsModal" tabindex="-1" aria-labelledby="equipmentLogsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-header" style="background-color: #ffab5d; color: #442c12;">
+                    <h5 class="modal-title" id="equipmentLogsModalLabel">Equipment Usage Logs</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body" style="background-color: #fcdbbc; color: #442c12;">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Equipment Name</th>
+                                    <th>Operator Name</th>
+                                    <th>Energy Consumed</th>
+                                    <th>Time Stamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: #fcdbbc;">
+                    <button type="button" class="btn btn-outline-dark rounded-pill" style="background-color: #fcdbbc; color: #442c12;" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <div class="main-container" id="mainContainer">
         <div class="options-grid row justify-content-center my-5 py-5 text-center" id="optionsGrid">
@@ -179,7 +243,18 @@
         <!-- Equipment Content Area -->
         <div class="content-area" id="equipmentsContent">
             <div class="table-container">
-                <h2 class="mb-4">Equipment Data</h2>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Equipment Data</h2>
+                    <button 
+                        type="button" 
+                        id="viewLogsBtn" 
+                        class="btn rounded-pill" 
+                        style="background-color: #ffab5d; color: #442c12;"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#equipmentLogsModal">
+                        View Logs
+                    </button>
+                </div>
                 <table>
                     <thead>
                         <tr>
@@ -188,6 +263,7 @@
                             <th>Power Rating</th>
                             <th>Manufacturing Date</th>
                             <th>Company ID</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -253,4 +329,5 @@
 
 {% block scripts %}
 <script src="../static/js/animate_options.js"></script>
+<script src="../static/js/render_data.js"></script>
 {% endblock scripts %}

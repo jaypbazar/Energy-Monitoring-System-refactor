@@ -106,12 +106,12 @@ th, td {
 }
 
 th {
-    background-color: #ffd6af;
+    background-color: #ffbb77;
     color: black;
 }
 
 tr:hover {
-    background-color: #ffbb77;
+    background-color: #ffd6af;
 }
 
 .option-container.active {
