@@ -93,7 +93,7 @@ def checkSession():
 
     elif session['user'] == '':
         # redirect to login page if user isn't logged in first
-        if request.endpoint not in ['static', 'login', 'register']:
+        if request.endpoint not in ['static', 'login', 'signup']:
             # Make sure it's not from login or a redirection loop will occur
             # Also make sure it's not from static so it won't flash the alert pop-up multiple times.
             flash("You must log in first before proceeding.", 'warning')
