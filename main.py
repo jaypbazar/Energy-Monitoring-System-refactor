@@ -257,10 +257,10 @@ def equipment_detail(equipment_id):
         )
 
         result = mysql.queryGetAll(
-            "SELECT OperatorID, OperatorName FROM operators"
+            "SELECT OperatorID FROM operators"
         )
 
-        operators = [(row['OperatorID'], row['OperatorName']) for row in result]
+        operators = [(row['OperatorID']) for row in result]
 
         return render_template('equipments/equipment_detail.html', equipment=equipment, operators = operators)
 
@@ -304,7 +304,7 @@ def add_log(equipment_id):
         new_alert_id = increment_id("AL", latest_alert_id)
 
         operates_check = mysql.queryGet(
-            "SELECT OperatorID, EquipmentID FROM operates WHERE OperatorID = %s AND EquipmentID = %s",
+            "SELECT OperatorID FROM operates WHERE OperatorID = %s AND EquipmentID = %s",
             (OperatorID, equipment_id)
         )
 
