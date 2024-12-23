@@ -94,7 +94,7 @@ def login():
                     (username,)
                 )
 
-                if password != userPassword['Password']:
+                if password != userPassword['Password'].lower():
                     flash("Incorrect password entered. Please try again.", 'danger')
                 
                 else:
