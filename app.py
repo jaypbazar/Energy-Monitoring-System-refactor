@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, flash, session, jsonify, make_response
 from datetime import datetime
 from database import MySQLDatabase
+from hashlib import sha256
 '''
 NOTES FROM CO-PROGRAMMER:
     These are functionalities required to run the frontend properly.
@@ -84,16 +85,17 @@ def login():
         elif request.method == 'POST':
             username = request.form.get('username')
             password = request.form.get('password')
+            password = sha256(password.encode()).hexdigest()
 
             if username not in session['username_list']:
                 flash(f"User \"{username}\" not found in database. Try signing up.", 'warning')
             else:
                 userPassword = mysql.queryGet(
-                    'SELECT Password FROM auth WHERE UserName = %s',
+                    'SELECT HEX(Password) AS Password FROM auth WHERE UserName = %s',
                     (username,)
                 )
 
-                if password != userPassword['Password']:
+                if password != userPassword['Password'].lower():
                     flash("Incorrect password entered. Please try again.", 'danger')
                 
                 else:
@@ -114,7 +116,8 @@ def signup():
     
     elif request.method == 'POST':
         username = request.form.get('username')
-        password = request.form.get('password')     
+        password = request.form.get('password')
+        password = sha256(password.encode()).hexdigest()
 
         if username in session['username_list']:
             flash(f'User "{username}" already exists.', 'danger')
@@ -126,11 +129,11 @@ def signup():
                 return redirect('/signup')
             else:
                 mysql.querySet(
-                    'INSERT INTO auth (UserName, Password) VALUES (%s,%s)',
+                    'INSERT INTO auth (UserName, Password) VALUES (%s,UNHEX(%s))',
                     (username, password)
                 )
                 flash("Registration successful! You can now log in with your new account.", 'success')
-                return redirect('/')
+                return redirect('/login')
 
 # Home Page Rendering
 @app.route('/home')
