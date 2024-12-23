@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, flash, session, jsonify, make_response
 from datetime import datetime
 from database import MySQLDatabase
 '''
@@ -79,7 +79,7 @@ def login():
     
     else:
         if request.method == 'GET':
-            return render_template('auth/login.html')
+            return render_template('login.html')
         
         elif request.method == 'POST':
             username = request.form.get('username')
@@ -110,7 +110,7 @@ def logout():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'GET':
-        return render_template('auth/signup.html')
+        return render_template('signup.html')
     
     elif request.method == 'POST':
         username = request.form.get('username')
@@ -160,29 +160,50 @@ def search_equipment():
 def add_new():
     return render_template('forms/add_new.html')
 
-# All Equipments Overview page rendering
+# Global data fetching endpoint
 @app.route('/fetch')
 def fetch():
     if request.method == 'GET':
         match list(request.args.keys())[0]:
             case 'equipments':
-                equipments = mysql.queryGetAll(
-                    'SELECT * FROM equipments'
-                )
+                if "id" in request.args.keys():
+                    equipments = mysql.queryGet(
+                        "SELECT * FROM equipments WHERE EquipmentID=%s",
+                        (request.args['id'],)
+                    )
+
+                else:
+                    equipments = mysql.queryGetAll(
+                        'SELECT * FROM equipments'
+                    )
 
                 return jsonify(equipments)
             
             case 'operators':
-                operators = mysql.queryGetAll(
-                    "SELECT O.*, C.CompanyName FROM operators O, company C WHERE O.CompanyID=C.CompanyID;"
-                )
+                if "id" in request.args.keys():
+                    operators = mysql.queryGet(
+                        "SELECT O.*, C.CompanyName FROM operators O, company C WHERE O.CompanyID=C.CompanyID AND O.OperatorID=%s;",
+                        (request.args['id'],)
+                    )
+                
+                else:
+                    operators = mysql.queryGetAll(
+                        "SELECT O.*, C.CompanyName FROM operators O, company C WHERE O.CompanyID=C.CompanyID;"
+                    )
 
                 return jsonify(operators)
             
             case 'companies':
-                companies = mysql.queryGetAll(
-                    "SELECT * FROM company"
-                )
+                if "id" in request.args.keys():
+                    companies = mysql.queryGet(
+                        "SELECT * FROM company WHERE CompanyID=%s",
+                        (request.args['id'],)
+                    )
+                    
+                else:
+                    companies = mysql.queryGetAll(
+                        "SELECT * FROM company"
+                    )
 
                 return jsonify(companies)
             
@@ -210,250 +231,116 @@ def fetch():
             
             case _:
                 return jsonify({'Error': 404, 'Reason': f"Unknown parameter '{list(request.args.keys())[0]}'"})
-    
-# Selected Equipment Page rendering
-@app.route('/equipment_<equipment_id>', methods=['GET', 'POST'])
-def equipment_detail(equipment_id):
-    if request.method == 'GET':
-        equipment = mysql.queryGet(
-            'SELECT * FROM equipments WHERE EquipmentID = %s',
-            (equipment_id,)
-        )
 
-        result = mysql.queryGetAll(
-            "SELECT OperatorID FROM operators"
-        )
-
-        operators = [(row['OperatorID']) for row in result]
-
-        return render_template('equipments/equipment_detail.html', equipment=equipment, operators = operators)
-
-    elif request.method == 'POST':
-        operator_id = request.form.get('OperatorID')
-        mysql.querySet(
-            'INSERT INTO operates (OperatorID, EquipmentID) VALUES (%s, %s)',
-            (operator_id, equipment_id)
-        )
-
-        operates = mysql.queryGetAll(
-            'SELECT * FROM operates'
-        )
-
-        return render_template('display_data/display_operates_data.html', operates=operates)
-
-# Selected Equipment adding Alert page rendering and logic
-@app.route('/equipment_<equipment_id>/add_log', methods = ['POST', 'GET'])
-def add_log(equipment_id):
-    if request.method == 'GET':
-        result = mysql.queryGet(
-            "SELECT AlertID FROM alerts ORDER BY AlertID DESC LIMIT 1"
-        )
-
-        latest_alert_id = result['AlertID'] if result else None
-        new_alert_id = increment_id("A", latest_alert_id)
-        TimeStamp = datetime.now()
-
-        return render_template('equipments/add_log.html', latest_alert_id = new_alert_id, equipment_id = equipment_id, time_stamp = TimeStamp)
-    
-    elif request.method == 'POST':
-        OperatorID = request.form['OperatorID']
-        EnergyConsumed = request.form['EnergyConsumed']
-        TimeStamp = datetime.now()
-
-        result = mysql.queryGet(
-            "SELECT AlertID FROM alerts ORDER BY AlertID DESC LIMIT 1"
-        )
-
-        latest_alert_id = result['AlertID'] if result else None
-        new_alert_id = increment_id("AL", latest_alert_id)
-
-        operates_check = mysql.queryGet(
-            "SELECT OperatorID FROM operates WHERE OperatorID = %s AND EquipmentID = %s",
-            (OperatorID, equipment_id)
-        )
-
-        if operates_check == None:
-            mysql.querySet(
-                "INSERT INTO operates VALUES(%s,%s)",
-                (OperatorID, equipment_id)
-            )
-
-        mysql.querySet(
-            "INSERT INTO alerts VALUES(%s,%s,%s,%s,%s)",
-            (new_alert_id, equipment_id, OperatorID, EnergyConsumed, TimeStamp)
-        )
-
-        data = mysql.queryGetAll(
-            "SELECT A.*, E.EquipmentName, O.OperatorName FROM alerts A, equipments E, operators O WHERE A.EquipmentID=E.EquipmentID AND A.OperatorID=O.OperatorID;"
-        )
-
-        return render_template('display_data/display_alerts_data.html', data=data)
-
-
-# Company Entry Page
-@app.route('/company', methods = ['POST', 'GET'])
-def company_entry():
-    if request.method == 'GET':
-        result = mysql.queryGet(
-            'SELECT CompanyID FROM company ORDER BY CompanyID DESC LIMIT 1'
-        )
-
-        latest_company_id = result['CompanyID'] if result else None
-        new_company_id = increment_id("C", latest_company_id)
-        
-        return render_template('forms/company.html', latest_company_id=new_company_id)
-    
+# Global data add enpoint
+@app.route('/add', methods=['POST'])
+def add():
     if request.method == 'POST':
-        CompanyName = request.form['CompanyName']
-        Location = request.form['Location']
-        Contact = request.form['Contact']
+        match list(request.args.keys())[0]:
+            case "operate":
+                operator_id = request.args['o_id']
+                equipment_id = request.args['e_id']
 
-        result = mysql.queryGet(
-            "SELECT CompanyID FROM company ORDER BY CompanyID DESC LIMIT 1"
-        )
+                mysql.querySet(
+                    'INSERT INTO operates (OperatorID, EquipmentID) VALUES (%s, %s)',
+                    (operator_id, equipment_id)
+                )
 
-        latest_company_id = result['CompanyID'] if result else None
-        new_company_id = increment_id("C", latest_company_id)
+                return {'successful': True}
 
-        mysql.querySet(
-            "INSERT INTO company VALUES(%s,%s,%s,%s)",
-            (new_company_id,CompanyName, Location, Contact)
-        )
+            case "log":
+                equipment_id = request.args['id']
 
-        data = mysql.queryGetAll(
-            'SELECT * FROM company'
-        )
+                OperatorID = request.args['o_id']
+                EnergyConsumed = request.args['e_con']
+                TimeStamp = datetime.now()
 
-        return render_template('display_data/display_company_data.html', data=data)
+                result = mysql.queryGet(
+                    "SELECT AlertID FROM alerts ORDER BY AlertID DESC LIMIT 1"
+                )
 
-# Company Data Page
-@app.route('/company_data')
-def display_company_data():
-    try:
-        data = mysql.queryGetAll("SELECT * FROM company")
-        return render_template('display_data/display_company_data.html', data=data)
-    
-    except Exception as e:
-        print("Error fetching data:", str(e))
-        flash("Error fetching data. Please check the console for details.", 'danger')
-        return redirect('/company_data')
-    
-# Equipments Entry Page
-@app.route('/equipments', methods = ['POST', 'GET'])
-def equipments_entry():
-    if request.method == 'GET':
-        result = mysql.queryGet(
-            "SELECT EquipmentID FROM equipments ORDER BY EquipmentID DESC LIMIT 1"
-        )
-        
-        latest_equipment_id = result['EquipmentID'] if result else None
-        new_equipment_id = increment_id("E", latest_equipment_id)
+                latest_alert_id = result['AlertID'] if result else None
+                new_alert_id = increment_id("AL", latest_alert_id)
 
-        result = mysql.queryGetAll(
-            "SELECT CompanyID FROM company"
-        )
-        
-        companies = [row['CompanyID'] for row in result]
-        
-        return render_template('forms/equipments.html', latest_equipment_id=new_equipment_id, companies=companies)
-    
-    elif request.method == 'POST':
-        EquipmentName = request.form['EquipmentName']
-        PowerRating = request.form['PowerRating']
-        ManufacturingDate = request.form['ManufacturingDate']
-        CompanyID = request.form['CompanyID']        
+                operates_check = mysql.queryGet(
+                    "SELECT OperatorID FROM operates WHERE OperatorID = %s AND EquipmentID = %s",
+                    (OperatorID, equipment_id)
+                )
 
-        result = mysql.queryGet(
-            "SELECT EquipmentID FROM equipments ORDER BY EquipmentID DESC LIMIT 1"
-        )
-        
-        latest_equipment_id = result['EquipmentID'] if result else None
-        new_equipment_id = increment_id("E", latest_equipment_id)
+                if operates_check == None:
+                    mysql.querySet(
+                        "INSERT INTO operates VALUES(%s,%s)",
+                        (OperatorID, equipment_id)
+                    )
 
-        mysql.querySet(
-            "INSERT INTO equipments VALUES(%s,%s,%s,%s,%s)",
-            (new_equipment_id, EquipmentName, PowerRating, ManufacturingDate, CompanyID)
-        )
-        
-        data = mysql.queryGetAll(
-            'SELECT * FROM equipments'
-        )
-        
-        return render_template('display_data/display_equipments_data.html', data=data)
-    
-# Equipments Data Page
-@app.route('/equipments_data')
-def display_equipments_data():
-    try:
-        data = mysql.queryGetAll(
-            "SELECT * FROM equipments"
-        )
-        
-        return render_template('display_data/display_equipments_data.html', data=data)
-    
-    except Exception as e:
-        print("Error fetching data:", str(e))
-        flash("Error fetching data. Please check the console for details.", 'danger')
-        return redirect('/equipments_data')
-    
-# Operators Entry Page
-@app.route('/operators', methods = ['POST', 'GET'])
-def operators_entry():
-    if request.method == 'GET':
-        result = mysql.queryGet(
-            "SELECT OperatorID FROM operators ORDER BY OperatorID DESC LIMIT 1"
-        )
+                mysql.querySet(
+                    "INSERT INTO alerts VALUES(%s,%s,%s,%s,%s)",
+                    (new_alert_id, equipment_id, OperatorID, EnergyConsumed, TimeStamp)
+                )
 
-        latest_operator_id = result['OperatorID'] if result else None
-        new_opeator_id = increment_id("O", latest_operator_id)
-        
-        result = mysql.queryGetAll(
-            "SELECT CompanyID FROM company"
-        )
+                return {'successful': True}
+            
+            case "company":
+                CompanyName = request.args['name']
+                Location = request.args['location']
+                Contact = request.args['contact']
 
-        companies = [row['CompanyID'] for row in result]
+                result = mysql.queryGet(
+                    "SELECT CompanyID FROM company ORDER BY CompanyID DESC LIMIT 1"
+                )
 
-        return render_template('forms/operators.html', latest_operator_id=new_opeator_id, companies=companies)
-    
-    elif request.method == 'POST':
-        OperatorName = request.form['OperatorName']
-        Occuption = request.form['Occupation']
-        PhoneNumber = request.form['PhoneNumber']
-        CompanyID = request.form['CompanyID']
+                latest_company_id = result['CompanyID'] if result else None
+                new_company_id = increment_id("C", latest_company_id)
 
-        result = mysql.queryGet(
-            "SELECT OperatorID FROM operators ORDER BY OperatorID DESC LIMIT 1"
-        )
+                mysql.querySet(
+                    "INSERT INTO company VALUES(%s,%s,%s,%s)",
+                    (new_company_id,CompanyName, Location, Contact)
+                )
 
-        latest_operator_id = result['OperatorID'] if result else None
-        new_opeator_id = increment_id("O", latest_operator_id)
+                return {'successful': True}
+            
+            case "equipment":
+                EquipmentName = request.args['name']
+                PowerRating = request.args['rating']
+                ManufacturingDate = request.args['date']
+                CompanyID = request.args['company']     
 
-        mysql.querySet(
-            "INSERT INTO operators VALUES(%s,%s,%s,%s,%s)",
-            (new_opeator_id, OperatorName, Occuption, PhoneNumber, CompanyID)
-        )
+                result = mysql.queryGet(
+                    "SELECT EquipmentID FROM equipments ORDER BY EquipmentID DESC LIMIT 1"
+                )
+                
+                latest_equipment_id = result['EquipmentID'] if result else None
+                new_equipment_id = increment_id("E", latest_equipment_id)
 
-        data = mysql.queryGetAll(
-            'SELECT * FROM operators'
-        )
-        
-        return render_template('display_data/display_operators_data.html', data=data)
+                mysql.querySet(
+                    "INSERT INTO equipments VALUES(%s,%s,%s,%s,%s)",
+                    (new_equipment_id, EquipmentName, PowerRating, ManufacturingDate, CompanyID)
+                )
 
-    
-# Operators Data Page
-@app.route('/operators_data')
-def display_operators_data():
-    try:
-        data = mysql.queryGetAll(
-            "SELECT * FROM operators"
-        )
+                return {'successful': True}
+            
+            case "operator":
+                OperatorName = request.args['name']
+                Occuption = request.args['occupation']
+                PhoneNumber = request.args['number']
+                CompanyID = request.args['c_id']
 
-        return render_template('display_data/display_operators_data.html', data=data)
-    
-    except Exception as e:
-        print("Error fetching data:", str(e))
-        flash("Error fetching data. Please check the console for details.", 'danger')
-        return redirect('/operators_data')
+                result = mysql.queryGet(
+                    "SELECT OperatorID FROM operators ORDER BY OperatorID DESC LIMIT 1"
+                )
+
+                latest_operator_id = result['OperatorID'] if result else None
+                new_opeator_id = increment_id("O", latest_operator_id)
+
+                mysql.querySet(
+                    "INSERT INTO operators VALUES(%s,%s,%s,%s,%s)",
+                    (new_opeator_id, OperatorName, Occuption, PhoneNumber, CompanyID)
+                )
+
+                return {'succesful': True}
+            
+            case _:
+                return jsonify({'Error': 404, 'Reason': f"Unknown parameter '{list(request.args.keys())[0]}'"})
 
 # Function to increment the retrieved IDs
 def increment_id(prefix, id):

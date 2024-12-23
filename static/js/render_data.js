@@ -44,6 +44,35 @@ async function populateLogsTable() {
     });
 }
 
+// Populate company options
+async function populateCompanySelect() {
+    const selectForms = document.getElementsByName('CompanyID');
+
+    const results = await fetch(
+        "/fetch?companies",
+        {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+    ).then((res) => res.json());
+
+    for (let selectForm of selectForms) {
+        if (selectForm.children.length != 1) {
+            let defaultOpt = selectForm.children[0];
+            selectForm.innerHTML = null;
+            selectForm.appendChild(defaultOpt);
+        }
+        for (let company of results) {
+            let newOption = document.createElement('option');
+            newOption.value = company['CompanyID'];
+            newOption.innerText = company['CompanyID'] + " - " + company['CompanyName'];
+            selectForm.appendChild(newOption);
+        }
+    }
+}
+
 // Add event listener for logs modal
 document.getElementById('equipmentLogsModal').addEventListener('show.bs.modal', populateLogsTable);
 
@@ -115,7 +144,7 @@ async function renderData(type) {
                 const operatorSelect = document.getElementById('OperatorID');
                 
                 // Update form action and equipment name
-                form.action = `/equipment_${object.EquipmentID}/add_log`;
+                form.name = `equipmentUsageForm_${object.EquipmentID}`;
                 equipmentNameSpan.textContent = object.EquipmentName;
                 
                 // Populate operator select
