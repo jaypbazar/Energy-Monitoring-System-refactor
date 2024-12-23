@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 23, 2024 at 12:04 PM
+-- Generation Time: Dec 23, 2024 at 03:37 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,44 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `dbms_mp_1`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `alerts`
---
-
-CREATE TABLE `alerts` (
-  `AlertID` varchar(20) NOT NULL,
-  `EquipmentID` varchar(20) DEFAULT NULL,
-  `OperatorID` varchar(20) DEFAULT NULL,
-  `EnergyConsumed` int(11) DEFAULT NULL,
-  `TimeStamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `alerts`
---
-
-INSERT INTO `alerts` (`AlertID`, `EquipmentID`, `OperatorID`, `EnergyConsumed`, `TimeStamp`) VALUES
-('A006', 'E001', 'O003', 200, '2024-12-22 00:31:15'),
-('AL001', 'E001', 'O001', 1500, '2024-03-05 00:30:00'),
-('AL002', 'E002', 'O002', 800, '2024-03-05 02:15:00'),
-('AL003', 'E003', 'O003', 300, '2024-03-05 04:45:00'),
-('AL004', 'E004', 'O004', 1200, '2024-03-05 06:30:00'),
-('AL005', 'E005', 'O005', 500, '2024-03-05 08:00:00'),
-('AL006', 'E001', 'O004', 230, '2024-12-22 22:23:16'),
-('AL007', 'E001', 'O004', 230, '2024-12-22 22:29:00'),
-('AL008', 'E001', 'O004', 230, '2024-12-22 22:29:29'),
-('AL009', 'E003', 'O003', 256, '2024-12-22 22:30:04'),
-('AL010', 'E003', 'O003', 256, '2024-12-22 22:30:32'),
-('AL011', 'E003', 'O003', 256, '2024-12-22 22:30:52'),
-('AL012', 'E006', 'O001', 1000, '2024-12-22 23:12:53'),
-('AL013', 'E005', 'O003', 541, '2024-12-22 23:14:35'),
-('AL014', 'E001', 'O001', 250, '2024-12-22 23:15:14'),
-('AL015', 'E003', 'O002', 200, '2024-12-22 23:16:18'),
-('AL016', 'E006', 'O005', 2000, '2024-12-22 23:51:28'),
-('AL017', 'E007', 'O006', 1200, '2024-12-23 01:20:50');
 
 -- --------------------------------------------------------
 
@@ -88,7 +50,7 @@ CREATE TABLE `company` (
   `CompanyID` varchar(20) NOT NULL,
   `CompanyName` varchar(30) DEFAULT NULL,
   `Location` varchar(30) DEFAULT NULL,
-  `Contact` int(11) DEFAULT NULL
+  `Contact` varchar(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -96,12 +58,12 @@ CREATE TABLE `company` (
 --
 
 INSERT INTO `company` (`CompanyID`, `CompanyName`, `Location`, `Contact`) VALUES
-('C001', 'ABC Electronics', 'New York', 12345678),
-('C002', 'XYZ Tech', 'San Francisco', 98765432),
-('C003', 'Tech Innovators', 'London', 45678901),
-('C004', 'Global Systems', 'Tokyo', 78901234),
-('C005', 'Smart Solutions', 'Sydney', 32109876),
-('C006', 'Mann Co.', 'Badlands, New Mexico', 5556943);
+('C001', 'ABC Electronics', 'New York', '12345678'),
+('C002', 'XYZ Tech', 'San Francisco', '98765432'),
+('C003', 'Tech Innovators', 'London', '45678901'),
+('C004', 'Global Systems', 'Tokyo', '78901234'),
+('C005', 'Smart Solutions', 'Sydney', '32109876'),
+('C006', 'Mann Co.', 'New Mexico', '5556943');
 
 -- --------------------------------------------------------
 
@@ -133,31 +95,40 @@ INSERT INTO `equipments` (`EquipmentID`, `EquipmentName`, `PowerRating`, `Manufa
 -- --------------------------------------------------------
 
 --
--- Table structure for table `operates`
+-- Table structure for table `logs`
 --
 
-CREATE TABLE `operates` (
-  `OperatorID` varchar(20) NOT NULL,
-  `EquipmentID` varchar(20) NOT NULL
+CREATE TABLE `logs` (
+  `AlertID` varchar(20) NOT NULL,
+  `EquipmentID` varchar(20) DEFAULT NULL,
+  `OperatorID` varchar(20) DEFAULT NULL,
+  `EnergyConsumed` int(11) DEFAULT NULL,
+  `TimeStamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `operates`
+-- Dumping data for table `logs`
 --
 
-INSERT INTO `operates` (`OperatorID`, `EquipmentID`) VALUES
-('O001', 'E001'),
-('O001', 'E006'),
-('O002', 'E002'),
-('O002', 'E003'),
-('O003', 'E001'),
-('O003', 'E003'),
-('O003', 'E005'),
-('O004', 'E001'),
-('O004', 'E004'),
-('O005', 'E005'),
-('O005', 'E006'),
-('O006', 'E007');
+INSERT INTO `logs` (`AlertID`, `EquipmentID`, `OperatorID`, `EnergyConsumed`, `TimeStamp`) VALUES
+('AL001', 'E001', 'O001', 1500, '2024-03-05 00:30:00'),
+('AL002', 'E002', 'O002', 800, '2024-03-05 02:15:00'),
+('AL003', 'E003', 'O003', 300, '2024-03-05 04:45:00'),
+('AL004', 'E004', 'O004', 1200, '2024-03-05 06:30:00'),
+('AL005', 'E005', 'O005', 500, '2024-03-05 08:00:00'),
+('AL006', 'E001', 'O004', 230, '2024-12-22 22:23:16'),
+('AL007', 'E001', 'O004', 230, '2024-12-22 22:29:00'),
+('AL008', 'E001', 'O004', 230, '2024-12-22 22:29:29'),
+('AL009', 'E003', 'O003', 256, '2024-12-22 22:30:04'),
+('AL010', 'E003', 'O003', 256, '2024-12-22 22:30:32'),
+('AL011', 'E003', 'O003', 256, '2024-12-22 22:30:52'),
+('AL012', 'E006', 'O001', 1000, '2024-12-22 23:12:53'),
+('AL013', 'E005', 'O003', 541, '2024-12-22 23:14:35'),
+('AL014', 'E001', 'O001', 250, '2024-12-22 23:15:14'),
+('AL015', 'E003', 'O002', 200, '2024-12-22 23:16:18'),
+('AL016', 'E006', 'O005', 2000, '2024-12-22 23:51:28'),
+('AL017', 'E001', 'O003', 200, '2024-12-23 14:10:12'),
+('AL018', 'E001', 'O001', 300, '2024-12-23 14:14:48');
 
 -- --------------------------------------------------------
 
@@ -190,14 +161,6 @@ INSERT INTO `operators` (`OperatorID`, `OperatorName`, `Occupation`, `PhoneNumbe
 --
 
 --
--- Indexes for table `alerts`
---
-ALTER TABLE `alerts`
-  ADD PRIMARY KEY (`AlertID`),
-  ADD KEY `EquipmentID` (`EquipmentID`),
-  ADD KEY `OperatorID` (`OperatorID`);
-
---
 -- Indexes for table `auth`
 --
 ALTER TABLE `auth`
@@ -217,11 +180,12 @@ ALTER TABLE `equipments`
   ADD KEY `CompanyID` (`CompanyID`);
 
 --
--- Indexes for table `operates`
+-- Indexes for table `logs`
 --
-ALTER TABLE `operates`
-  ADD PRIMARY KEY (`OperatorID`,`EquipmentID`),
-  ADD KEY `EquipmentID` (`EquipmentID`);
+ALTER TABLE `logs`
+  ADD PRIMARY KEY (`AlertID`),
+  ADD KEY `EquipmentID` (`EquipmentID`),
+  ADD KEY `OperatorID` (`OperatorID`);
 
 --
 -- Indexes for table `operators`
@@ -235,30 +199,23 @@ ALTER TABLE `operators`
 --
 
 --
--- Constraints for table `alerts`
---
-ALTER TABLE `alerts`
-  ADD CONSTRAINT `alerts_ibfk_1` FOREIGN KEY (`EquipmentID`) REFERENCES `equipments` (`EquipmentID`),
-  ADD CONSTRAINT `alerts_ibfk_2` FOREIGN KEY (`OperatorID`) REFERENCES `operators` (`OperatorID`);
-
---
 -- Constraints for table `equipments`
 --
 ALTER TABLE `equipments`
-  ADD CONSTRAINT `equipments_ibfk_1` FOREIGN KEY (`CompanyID`) REFERENCES `company` (`CompanyID`);
+  ADD CONSTRAINT `equipments_ibfk_1` FOREIGN KEY (`CompanyID`) REFERENCES `company` (`CompanyID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `operates`
+-- Constraints for table `logs`
 --
-ALTER TABLE `operates`
-  ADD CONSTRAINT `operates_ibfk_1` FOREIGN KEY (`OperatorID`) REFERENCES `operators` (`OperatorID`),
-  ADD CONSTRAINT `operates_ibfk_2` FOREIGN KEY (`EquipmentID`) REFERENCES `equipments` (`EquipmentID`);
+ALTER TABLE `logs`
+  ADD CONSTRAINT `logs_ibfk_1` FOREIGN KEY (`EquipmentID`) REFERENCES `equipments` (`EquipmentID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `logs_ibfk_2` FOREIGN KEY (`OperatorID`) REFERENCES `operators` (`OperatorID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `operators`
 --
 ALTER TABLE `operators`
-  ADD CONSTRAINT `operators_ibfk_1` FOREIGN KEY (`CompanyID`) REFERENCES `company` (`CompanyID`);
+  ADD CONSTRAINT `operators_ibfk_1` FOREIGN KEY (`CompanyID`) REFERENCES `company` (`CompanyID`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

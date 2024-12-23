@@ -70,13 +70,13 @@ def updateUsernameList():
 # Root Redirect
 @app.route('/')
 def index():
-    return redirect('/home')
+    return redirect('/dashboard')
 
 # Login Page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if session['user']:
-        return redirect('/home')
+        return redirect('/dashboard')
     
     else:
         if request.method == 'GET':
@@ -134,9 +134,9 @@ def signup():
                 return redirect('/login')
 
 # Home Page Rendering
-@app.route('/home')
+@app.route('/dashboard')
 def home_page():
-    return render_template('home.html')
+    return render_template('dashboard.html', flash=flash)
 
 # Home Page Searching
 @app.route('/search_equipment', methods=['GET'])
@@ -144,7 +144,7 @@ def search_equipment():
     equipment_name = request.args.get('equipment_name')
     if equipment_name == '':
         flash("Please enter a search query.", 'warning')
-        return redirect('/home')
+        return redirect('/dashboard')
 
     equipments = mysql.queryGetAll('SELECT equipments.*, CompanyName FROM equipments, company WHERE EquipmentName LIKE %s AND equipments.CompanyID=company.CompanyID', 
                 ("%" + equipment_name + "%",)
@@ -152,7 +152,7 @@ def search_equipment():
 
     if equipments == ():
         flash(f"No equipment(s) found for search query: '{equipment_name}'.", 'info')
-        return redirect('/home')
+        return redirect('/dashboard')
     
     return render_template('search_results.html', equipments=equipments)
 
@@ -205,25 +205,17 @@ def fetch():
             
             case 'energy':
                 energy_usage = mysql.queryGetAll(
-                    "SELECT E.EquipmentID, E.EquipmentName, SUM(A.EnergyConsumed) AS EnergyConsumed FROM alerts A , equipments E WHERE A.EquipmentID=E.EquipmentID GROUP BY E.EquipmentID;"
+                    "SELECT E.EquipmentID, E.EquipmentName, SUM(A.EnergyConsumed) AS EnergyConsumed FROM logs A , equipments E WHERE A.EquipmentID=E.EquipmentID GROUP BY E.EquipmentID;"
                 )
 
                 return jsonify(energy_usage)
 
             case 'logs':
                 logs = mysql.queryGetAll(
-                    'SELECT A.*, E.EquipmentName, O.OperatorName FROM alerts A, equipments E, operators O WHERE A.EquipmentID=E.EquipmentID AND A.OperatorID=O.OperatorID;'
+                    'SELECT A.*, E.EquipmentName, O.OperatorName FROM logs A, equipments E, operators O WHERE A.EquipmentID=E.EquipmentID AND A.OperatorID=O.OperatorID;'
                 )
 
                 return jsonify(logs)
-            
-            case 'operates':
-                operates = mysql.queryGetAll(
-                    "SELECT * FROM operates"
-                )
-
-                return jsonify(operates)
-
             
             case _:
                 return jsonify({'Error': 404, 'Reason': f"Unknown parameter '{list(request.args.keys())[0]}'"})
@@ -233,17 +225,6 @@ def fetch():
 def add():
     if request.method == 'POST':
         match list(request.args.keys())[0]:
-            case "operate":
-                operator_id = request.args['o_id']
-                equipment_id = request.args['e_id']
-
-                mysql.querySet(
-                    'INSERT INTO operates (OperatorID, EquipmentID) VALUES (%s, %s)',
-                    (operator_id, equipment_id)
-                )
-
-                return {'successful': True}
-
             case "log":
                 equipment_id = request.args['id']
 
@@ -252,25 +233,14 @@ def add():
                 TimeStamp = datetime.now()
 
                 result = mysql.queryGet(
-                    "SELECT AlertID FROM alerts ORDER BY AlertID DESC LIMIT 1"
+                    "SELECT AlertID FROM logs ORDER BY AlertID DESC LIMIT 1"
                 )
 
                 latest_alert_id = result['AlertID'] if result else None
                 new_alert_id = increment_id("AL", latest_alert_id)
 
-                operates_check = mysql.queryGet(
-                    "SELECT OperatorID FROM operates WHERE OperatorID = %s AND EquipmentID = %s",
-                    (OperatorID, equipment_id)
-                )
-
-                if operates_check == None:
-                    mysql.querySet(
-                        "INSERT INTO operates VALUES(%s,%s)",
-                        (OperatorID, equipment_id)
-                    )
-
                 mysql.querySet(
-                    "INSERT INTO alerts VALUES(%s,%s,%s,%s,%s)",
+                    "INSERT INTO logs VALUES(%s,%s,%s,%s,%s)",
                     (new_alert_id, equipment_id, OperatorID, EnergyConsumed, TimeStamp)
                 )
 
@@ -317,7 +287,7 @@ def add():
             
             case "operator":
                 OperatorName = request.args['name']
-                Occuption = request.args['occupation']
+                Occupation = request.args['occupation']
                 PhoneNumber = request.args['number']
                 CompanyID = request.args['c_id']
 
@@ -330,7 +300,134 @@ def add():
 
                 mysql.querySet(
                     "INSERT INTO operators VALUES(%s,%s,%s,%s,%s)",
-                    (new_opeator_id, OperatorName, Occuption, PhoneNumber, CompanyID)
+                    (new_opeator_id, OperatorName, Occupation, PhoneNumber, CompanyID)
+                )
+
+                return {'succesful': True}
+            
+            case _:
+                return jsonify({'Error': 404, 'Reason': f"Unknown parameter '{list(request.args.keys())[0]}'"})
+
+# Global data edit enpoint
+@app.route('/edit', methods=['POST'])
+def edit():
+    if request.method == 'POST':
+        match list(request.args.keys())[0]:
+            case "company":
+                CompanyID = request.args['id']
+                CompanyName = request.args['name']
+                Location = request.args['location']
+                Contact = request.args['contact']
+
+                # Fetch pre-exisitng data first if some queries are left empty
+                existing_data = mysql.queryGet(
+                    "SELECT CompanyName, Location, Contact FROM company WHERE CompanyID=%s",
+                    (CompanyID,)
+                )
+
+                CompanyName = existing_data['CompanyName'] if CompanyName == '' else CompanyName
+                Location = existing_data['Location'] if Location == '' else Location
+                Contact = existing_data['Contact'] if Contact == '' else Contact
+
+                mysql.querySet(
+                    "UPDATE company SET CompanyName=%s,Location=%s,Contact=%s WHERE CompanyID=%s",
+                    (CompanyName, Location, Contact, CompanyID)
+                )
+
+                return {'successful': True}
+            
+            case "equipment":
+                EquipmentID = request.args['id']
+                EquipmentName = request.args['name']
+                PowerRating = request.args['rating']
+                ManufacturingDate = request.args['date']
+                CompanyID = request.args['company']     
+
+                existing_data = mysql.queryGet(
+                    "SELECT EquipmentName, PowerRating, ManufacturingDate, CompanyID FROM equipments WHERE EquipmentID=%s",
+                    (EquipmentID,)
+                )
+
+                EquipmentName = existing_data['EquipmentName'] if EquipmentName == '' else EquipmentName
+                PowerRating = existing_data['PowerRating'] if PowerRating == '' else PowerRating
+                ManufacturingDate = existing_data['ManufacturingDate'] if ManufacturingDate == '' else ManufacturingDate
+                CompanyID = existing_data['CompanyID'] if CompanyID == '' else CompanyID
+
+                mysql.querySet(
+                    "UPDATE equipments SET EquipmentName=%s,PowerRating=%s,ManufacturingDate=%s,CompanyID=%s WHERE EquipmentID=%s",
+                    (EquipmentName, PowerRating, ManufacturingDate, CompanyID, EquipmentID)
+                )
+
+                return {'successful': True}
+            
+            case "operator":
+                OperatorID = request.args['id']
+                OperatorName = request.args['name']
+                Occupation = request.args['occupation']
+                PhoneNumber = request.args['number']
+                CompanyID = request.args['c_id']
+
+                existing_data = mysql.queryGet(
+                    "SELECT OperatorName, Occupation, PhoneNumber, CompanyID FROM operators WHERE OperatorID=%s",
+                    (OperatorID,)
+                )
+
+                OperatorName = existing_data['OperatorName'] if OperatorName == '' else OperatorName
+                Occupation = existing_data['Occupation'] if Occupation == '' else Occupation
+                PhoneNumber = existing_data['PhoneNumber'] if PhoneNumber == '' else PhoneNumber
+                CompanyID = existing_data['CompanyID'] if CompanyID == '' else CompanyID
+
+                mysql.querySet(
+                    "UPDATE operators SET OperatorName=%s,Occupation=%s,PhoneNumber=%s,CompanyID=%s WHERE OperatorID=%s",
+                    (OperatorName, Occupation, PhoneNumber, CompanyID, OperatorID)
+                )
+
+                return {'succesful': True}
+            
+            case _:
+                return jsonify({'Error': 404, 'Reason': f"Unknown parameter '{list(request.args.keys())[0]}'"})
+
+# Global data delete enpoint
+@app.route('/delete', methods=['POST'])
+def delete():
+    if request.method == 'POST':
+        match list(request.args.keys())[0]:
+            case "log":
+                AlertID = request.args['id']
+                
+                mysql.querySet(
+                    "DELETE FROM logs WHERE AlertID=%s",
+                    (AlertID,)
+                )
+
+                return {'successful': True}
+            
+            case "company":
+                CompanyID = request.args['id']
+
+                mysql.querySet(
+                    "DELETE FROM company WHERE CompanyID=%s",
+                    (CompanyID,)
+                )
+
+                return {'successful': True}
+            
+            case "equipment":
+                EquipmentID = request.args['id']
+
+                mysql.querySet(
+                    "DELETE FROM equipments WHERE EquipmentID=%s",
+                    (EquipmentID,)
+                )
+
+                return {'successful': True}
+            
+            case "operator":
+                OperatorID = request.args['id']
+
+                mysql.querySet(
+                    "DELETE FROM operators WHERE OperatorID=%s",
+                    (OperatorID,)
                 )
 
                 return {'succesful': True}
