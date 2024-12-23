@@ -1,34 +1,202 @@
-function onClickClearFormAlerts() {
-    const alerts = document.querySelectorAll('.alert');
-    for (let alert of alerts) {
-        if (alert.parentElement.tagName == 'FORM') {
-            alert.remove();
+// Helper function to create flash message
+function createFlashMessage(message, type) {
+    const flash = document.createElement('div');
+    flash.className = `alert alert-${type} position-fixed`;
+    flash.style.right = '20px';
+    flash.style.top = '20px';
+    flash.style.zIndex = '9999';
+    flash.innerText = message;
+    
+    // Add close button
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'btn-close';
+    closeButton.setAttribute('data-bs-dismiss', 'alert');
+    closeButton.setAttribute('aria-label', 'Close');
+    flash.appendChild(closeButton);
+    
+    document.body.appendChild(flash);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => flash.remove(), 5000);
+}
+
+// Helper function to validate and handle form submission
+async function handleFormSubmit(form, submitFunction, modalId) {
+    const requiredFields = form.querySelectorAll('[required]');
+    let isValid = true;
+    
+    // Check all required fields
+    requiredFields.forEach(field => {
+        if (!field.value) {
+            isValid = false;
+            field.classList.add('is-invalid');
+        } else {
+            field.classList.remove('is-invalid');
         }
+    });
+    
+    if (!isValid) {
+        createFlashMessage('Please fill in all required fields', 'danger');
+        return false;
+    }
+    
+    try {
+        const status = await submitFunction();
+        
+        if (status.successful) {
+            createFlashMessage('Operation completed successfully', 'success');
+            const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+            modal.hide();
+            form.reset();
+            // Refresh the data display after successful submission
+            if (modalId === 'newCompanyModal') {
+                renderData('companiesContent');
+            } else if (modalId === 'newEquipmentModal') {
+                renderData('equipmentsContent');
+            } else if (modalId === 'newOperatorModal') {
+                renderData('operatorsContent');
+            }
+            return true;
+        } else {
+            createFlashMessage('Operation failed. Please check your input and try again.', 'danger');
+            return false;
+        }
+    } catch (error) {
+        console.error('Submission error:', error);
+        createFlashMessage('An error occurred. Please try again.', 'danger');
+        return false;
     }
 }
 
-function onClickAddLog() {
+async function onClickAddLog() {
     const form = document.getElementById('equipmentUsageForm');
-    var equipment_id = form.name.split('equipmentUsageForm_')[1];
-    (async() => await addLog(equipment_id, form))();
+    const equipment_id = form.name.split('equipmentUsageForm_')[1];
+    
+    const submitFunction = async () => {
+        const o_id = form.OperatorID.value;
+        const e_con = form.EnergyConsumed.value;
+        
+        if (!o_id || !e_con) {
+            return { successful: false };
+        }
+        
+        return await fetch(
+            "/add?log&" + new URLSearchParams({
+                id: equipment_id,
+                o_id: o_id,
+                e_con: e_con
+            }),
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        ).then((res) => res.json());
+    };
+    
+    await handleFormSubmit(form, submitFunction, 'equipmentUsageModal');
 }
 
-function onClickAddCompany() {
-    const modal = document.getElementById('newCompanyModal');
-    const form = modal.getElementsByTagName('form')[0];
-    (async() => await addCompany(form))();
+async function onClickAddCompany() {
+    const form = document.querySelector('#newCompanyModal form');
+    
+    const submitFunction = async () => {
+        const name = form.CompanyName.value;
+        const location = form.Location.value;
+        const contact = form.Contact.value;
+        
+        if (!name || !location || !contact) {
+            return { successful: false };
+        }
+        
+        return await fetch(
+            "/add?company&" + new URLSearchParams({
+                name: name,
+                location: location,
+                contact: contact
+            }),
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        ).then((res) => res.json());
+    };
+    
+    await handleFormSubmit(form, submitFunction, 'newCompanyModal');
 }
 
-function onClickAddEquipment() {
-    const modal = document.getElementById('newEquipmentModal');
-    const form = modal.getElementsByTagName('form')[0];
-    (async() => await addEquipment(form))();
+async function onClickAddEquipment() {
+    const form = document.querySelector('#newEquipmentModal form');
+    
+    const submitFunction = async () => {
+        const name = form.EquipmentName.value;
+        const rating = form.PowerRating.value;
+        const date = form.ManufacturingDate.value;
+        const company = form.CompanyID.value;
+        
+        if (!name || !rating || !date || !company) {
+            return { successful: false };
+        }
+        
+        return await fetch(
+            "/add?equipment&" + new URLSearchParams({
+                name: name,
+                rating: rating,
+                date: date,
+                company: company
+            }),
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        ).then((res) => res.json());
+    };
+    
+    await handleFormSubmit(form, submitFunction, 'newEquipmentModal');
 }
 
-function onClickAddOperator() {
-    const modal = document.getElementById('newOperatorModal');
-    const form = modal.getElementsByTagName('form')[0];
-    (async() => await addOperator(form))();
+async function onClickAddOperator() {
+    const form = document.querySelector('#newOperatorModal form');
+    
+    const submitFunction = async () => {
+        const name = form.OperatorName.value;
+        const occupation = form.Occupation.value;
+        const number = form.PhoneNumber.value;
+        const c_id = form.CompanyID.value;
+        
+        if (!name || !occupation || !number || !c_id) {
+            return { successful: false };
+        }
+        
+        return await fetch(
+            "/add?operator&" + new URLSearchParams({
+                name: name,
+                occupation: occupation,
+                number: number,
+                c_id: c_id
+            }),
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        ).then((res) => res.json());
+    };
+    
+    await handleFormSubmit(form, submitFunction, 'newOperatorModal');
+}
+
+// Remove existing alerts when closing modal
+function onClickClearFormAlerts() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => alert.remove());
 }
 
 // Add log async function after submitting form from modal
