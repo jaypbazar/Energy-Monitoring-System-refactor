@@ -90,7 +90,7 @@ def login():
                 flash(f"User \"{username}\" not found in database. Try signing up.", 'warning')
             else:
                 userPassword = mysql.queryGet(
-                    'SELECT Password FROM auth WHERE UserName = %s',
+                    'SELECT HEX(Password) AS Password FROM auth WHERE UserName = %s',
                     (username,)
                 )
 
@@ -127,7 +127,7 @@ def signup():
                 return redirect('/signup')
             else:
                 mysql.querySet(
-                    'INSERT INTO auth (UserName, Password) VALUES (%s, %s)',
+                    'INSERT INTO auth (UserName, Password) VALUES (%s, UNHEX(%s))',
                     (username, password)
                 )
                 flash("Registration successful! You can now log in with your new account.", 'success')
