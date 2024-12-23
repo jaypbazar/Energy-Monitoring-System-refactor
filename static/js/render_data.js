@@ -92,9 +92,96 @@ async function populateOperatorSelect(selectElement) {
     });
 }
 
+// Function to create action buttons
+function createActionButtons(type, data) {
+    const actionCell = document.createElement('td');
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'd-flex gap-2';
+
+    // Edit button
+    const editButton = document.createElement('button');
+    editButton.className = 'btn btn-sm btn-success rounded-pill';
+    editButton.textContent = 'Edit';
+    
+    editButton.addEventListener('click', () => {
+        // Get the modal element and create a new Modal instance
+        const modalElement = document.getElementById(`edit${type}Modal`);
+        const modal = new bootstrap.Modal(modalElement);
+        const form = document.getElementById(`edit${type}Form`);
+        
+        // Set form data
+        for (const key in data) {
+            const input = form.querySelector(`[name="edit${key}"]`);
+            if (input) {
+                input.value = data[key];
+            }
+        }
+        
+        // For company select fields
+        if (form.querySelector('[name="editCompanyID"]')) {
+            populateCompanySelect();
+            setTimeout(() => {
+                form.querySelector('[name="editCompanyID"]').value = data.CompanyID;
+            }, 100);
+        }
+        
+        // Store ID for submission
+        form.dataset.id = data[`${type}ID`];
+        
+        modal.show();
+    });
+
+    // Delete button
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'btn btn-sm btn-danger rounded-pill';
+    deleteButton.textContent = 'Delete';
+    
+    deleteButton.addEventListener('click', () => {
+        // Show delete confirmation modal
+        const modalElement = document.getElementById('deleteConfirmationModal');
+        const modal = new bootstrap.Modal(modalElement);
+        const confirmButton = document.getElementById('confirmDeleteButton');
+        
+        // Update modal content
+        document.getElementById('deleteItemType').textContent = type;
+        document.getElementById('deleteItemName').textContent = data[`${type}Name`];
+        
+        // Set up confirmation button
+        confirmButton.onclick = async () => {
+            try {
+                const response = await fetch(`/delete?${type.toLowerCase()}&id=${data[`${type}ID`]}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                if (result.successful) {
+                    modal.hide();
+                    // Refresh the table
+                    renderData(`${type.toLowerCase()}sContent`);
+                    // Clear cache if deleting an operator
+                    if (type === 'Operator') {
+                        operatorsCache = null;
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+        
+        modal.show();
+    });
+
+    buttonContainer.appendChild(editButton);
+    buttonContainer.appendChild(deleteButton);
+    actionCell.appendChild(buttonContainer);
+    return actionCell;
+}
+
 // Render table entries asynchronously
 async function renderData(type) {
-    // Get data from /fetch endpoint
     const results = await fetch(
         "/fetch?" + type.replace('Content', ''),
         {
@@ -103,20 +190,18 @@ async function renderData(type) {
                 'Content-Type': 'application/json'
             }
         }
-    ).then(
-        (res)=>res.json()
-    );
+    ).then((res) => res.json());
 
     const orderedKeys = {
         'equipmentsContent': ['EquipmentID', 'EquipmentName', 'PowerRating', 'ManufacturingDate', 'CompanyID'],
         'operatorsContent': ['OperatorID', 'OperatorName', 'Occupation', 'PhoneNumber', 'CompanyName'],
         'companiesContent': ['CompanyID', 'CompanyName', 'Location', 'Contact'],
         'energyContent': ['EquipmentID', 'EquipmentName', 'EnergyConsumed']
-    }
+    };
 
     const parent = document.getElementById(type);
     const table = parent.getElementsByTagName('tbody')[0];
-    table.innerHTML = ''; // Clear existing content
+    table.innerHTML = '';
 
     for (let object of results) {
         const newRow = document.createElement('tr');
@@ -127,11 +212,17 @@ async function renderData(type) {
             newRow.appendChild(newRowData);
         }
 
+        // Add action buttons for equipment, operator, and company tables
+        if (type !== 'energyContent') {
+            const entityType = type.replace('Content', '').replace(/s$/, '');
+            const actionCell = createActionButtons(entityType, object);
+            newRow.appendChild(actionCell);
+        }
+
         // Add Use button for equipment entries
         if (type === 'equipmentsContent') {
-            const actionCell = document.createElement('td');
             const useButton = document.createElement('button');
-            useButton.className = 'btn rounded-pill';
+            useButton.className = 'btn rounded-pill ms-2';
             useButton.style.backgroundColor = '#ffab5d';
             useButton.style.color = '#442c12';
             useButton.textContent = 'Use';
@@ -143,22 +234,17 @@ async function renderData(type) {
                 const equipmentNameSpan = document.getElementById('equipmentNameSpan');
                 const operatorSelect = document.getElementById('OperatorID');
                 
-                // Update form action and equipment name
                 form.name = `equipmentUsageForm_${object.EquipmentID}`;
                 equipmentNameSpan.textContent = object.EquipmentName;
-                
-                // Populate operator select
                 await populateOperatorSelect(operatorSelect);
                 
-                // Set current timestamp
                 const now = new Date();
                 timeStamp.textContent = now.toLocaleString();
                 
                 modal.show();
             });
             
-            actionCell.appendChild(useButton);
-            newRow.appendChild(actionCell);
+            newRow.lastChild.querySelector('div').appendChild(useButton);
         }
 
         table.appendChild(newRow);
