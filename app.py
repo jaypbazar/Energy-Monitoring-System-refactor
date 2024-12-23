@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, flash, session, jsonify, make_response
 from datetime import datetime
 from database import MySQLDatabase
-from hashlib import sha256
+from backend import increment_id, encrypt
 '''
 NOTES FROM CO-PROGRAMMER:
     These are functionalities required to run the frontend properly.
@@ -84,18 +84,17 @@ def login():
         
         elif request.method == 'POST':
             username = request.form.get('username')
-            password = request.form.get('password')
-            password = sha256(password.encode()).hexdigest()
+            password = encrypt(request.form.get('password'))
 
             if username not in session['username_list']:
                 flash(f"User \"{username}\" not found in database. Try signing up.", 'warning')
             else:
                 userPassword = mysql.queryGet(
-                    'SELECT HEX(Password) AS Password FROM auth WHERE UserName = %s',
+                    'SELECT Password FROM auth WHERE UserName = %s',
                     (username,)
                 )
 
-                if password != userPassword['Password'].lower():
+                if password != userPassword['Password']:
                     flash("Incorrect password entered. Please try again.", 'danger')
                 
                 else:
@@ -116,8 +115,7 @@ def signup():
     
     elif request.method == 'POST':
         username = request.form.get('username')
-        password = request.form.get('password')
-        password = sha256(password.encode()).hexdigest()
+        password = encrypt(request.form.get('password'))
 
         if username in session['username_list']:
             flash(f'User "{username}" already exists.', 'danger')
@@ -129,7 +127,7 @@ def signup():
                 return redirect('/signup')
             else:
                 mysql.querySet(
-                    'INSERT INTO auth (UserName, Password) VALUES (%s,UNHEX(%s))',
+                    'INSERT INTO auth (UserName, Password) VALUES (%s, %s)',
                     (username, password)
                 )
                 flash("Registration successful! You can now log in with your new account.", 'success')
@@ -157,11 +155,6 @@ def search_equipment():
         return redirect('/home')
     
     return render_template('search_results.html', equipments=equipments)
-
-# Add New page rendering
-@app.route('/add_new')
-def add_new():
-    return render_template('forms/add_new.html')
 
 # Global data fetching endpoint
 @app.route('/fetch')
@@ -344,18 +337,6 @@ def add():
             
             case _:
                 return jsonify({'Error': 404, 'Reason': f"Unknown parameter '{list(request.args.keys())[0]}'"})
-
-# Function to increment the retrieved IDs
-def increment_id(prefix, id):
-    if id is not None:
-        num = id[-3:]
-
-        num = int(num) + 1
-        num = str(num).zfill(3)
-
-        return prefix + num
-    
-    return prefix + '001'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
