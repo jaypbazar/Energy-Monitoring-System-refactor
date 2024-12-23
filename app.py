@@ -303,7 +303,7 @@ def add():
                     (new_opeator_id, OperatorName, Occupation, PhoneNumber, CompanyID)
                 )
 
-                return {'succesful': True}
+                return {'successful': True}
             
             case _:
                 return jsonify({'Error': 404, 'Reason': f"Unknown parameter '{list(request.args.keys())[0]}'"})
