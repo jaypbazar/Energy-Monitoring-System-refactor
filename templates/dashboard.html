@@ -214,15 +214,15 @@
                 <hr>
                 <h4>Equipments</h4>
             </div>
-            <div class="option-container col-2 p-3 m-3 rounded-4" data-content="operators">
-                <img src="../static/images/logo-operator.png" width="70%">
-                <hr>
-                <h4>Operators</h4>
-            </div>
             <div class="option-container col-2 p-3 m-3 rounded-4" data-content="energy">
                 <img src="../static/images/logo-energy-usage.png" width="70%">
                 <hr>
                 <h4>Energy Usage</h4>
+            </div>
+            <div class="option-container col-2 p-3 m-3 rounded-4" data-content="operators">
+                <img src="../static/images/logo-operator.png" width="70%">
+                <hr>
+                <h4>Operators</h4>
             </div>
             <div class="option-container col-2 p-3 m-3 rounded-4" data-content="companies">
                 <img src="../static/images/logo-company.png" width="70%">
@@ -274,6 +274,7 @@
                             <th>Occupation</th>
                             <th>Phone Number</th>
                             <th>Company Name</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -290,7 +291,7 @@
                         <tr>
                             <th>Equipment ID</th>
                             <th>Equipment Name</th>
-                            <th>Energy Consumed</th>
+                            <th>Total Energy Consumed</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -309,6 +310,7 @@
                             <th>Company Name</th>
                             <th>Location</th>
                             <th>Contact</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -322,5 +324,5 @@
 <script src="../static/js/animate_options.js"></script>
 <script src="../static/js/render_data.js"></script>
 <script src="../static/js/modal_add.js"></script>
-<script src="../static/js/utils.js"></script>
+<script src="../static/js/modal_form_handler.js"></script>
 {% endblock scripts %}

@@ -2,41 +2,6 @@ from flask import Flask, render_template, request, redirect, flash, session, jso
 from datetime import datetime
 from database import MySQLDatabase
 from backend import increment_id, encrypt
-'''
-NOTES FROM CO-PROGRAMMER:
-    These are functionalities required to run the frontend properly.
-
-    [/]TODO: add a '/login' route to process login
-
-    [/]TODO: when logged in add session['user']=username
-    
-    [/]TODO: redirect main('/') route to login when user not in session otherwise to home
-    
-    [/]TODO: fetch all usernames from database into session['username_list'] for validation (cannot have same username)
-    
-    [/]TODO: use flash in error messages (import flash from flask)
-          format: flash('<error message>', 'message type')
-          message types: 'success', 'danger', 'info', 'warning'
-          'success' = green
-          'danger' = red
-          'info' = blue
-          'warning' = yellow
-
-    [/]TODO: check every route if there is session['user'], if none redirect to login
-
-    [X]TODO: pass the data for equipments, operators, energy from the database to home
-
-
-'''
-
-'''
-NOTES TO SELF:
-    [/]TODO: Integrate Database object so it looks cleaner and organized.
-    
-    [x]TODO: Simplify and organize code. (Nothing wrong with making another Python file to organize the code more).
-       Reason: Seems like flask_mysqldb has some issues with database connections if on a separate file as it's trying
-       to find an active AppContext object thing. idk. it just doesnt work.
-'''
 
 app = Flask(__name__)
 mysql = MySQLDatabase(app)
@@ -237,7 +202,7 @@ def add():
                     (equipment_id,)
                 )['PowerRating']
 
-                EnergyConsumed = str(int(EnergyConsumed) + int(PowerRating))
+                EnergyConsumed = str(int(EnergyConsumed) * int(PowerRating))
 
                 result = mysql.queryGet(
                     "SELECT AlertID FROM logs ORDER BY AlertID DESC LIMIT 1"
