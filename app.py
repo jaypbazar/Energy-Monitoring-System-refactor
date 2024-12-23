@@ -232,6 +232,13 @@ def add():
                 EnergyConsumed = request.args['e_con']
                 TimeStamp = datetime.now()
 
+                PowerRating = mysql.queryGet(
+                    "SELECT PowerRating FROM equipments WHERE EquipmentID=%s",
+                    (equipment_id,)
+                )['PowerRating']
+
+                EnergyConsumed = str(int(EnergyConsumed) + int(PowerRating))
+
                 result = mysql.queryGet(
                     "SELECT AlertID FROM logs ORDER BY AlertID DESC LIMIT 1"
                 )
