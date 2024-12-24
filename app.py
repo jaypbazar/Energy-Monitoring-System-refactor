@@ -285,29 +285,6 @@ def add():
 def edit():
     if request.method == 'POST':
         match list(request.args.keys())[0]:
-            case "company":
-                CompanyID = request.args['id']
-                CompanyName = request.args['name']
-                Location = request.args['location']
-                Contact = request.args['contact']
-
-                # Fetch pre-exisitng data first if some queries are left empty
-                existing_data = mysql.queryGet(
-                    "SELECT CompanyName, Location, Contact FROM company WHERE CompanyID=%s",
-                    (CompanyID,)
-                )
-
-                CompanyName = existing_data['CompanyName'] if CompanyName == '' else CompanyName
-                Location = existing_data['Location'] if Location == '' else Location
-                Contact = existing_data['Contact'] if Contact == '' else Contact
-
-                mysql.querySet(
-                    "UPDATE company SET CompanyName=%s,Location=%s,Contact=%s WHERE CompanyID=%s",
-                    (CompanyName, Location, Contact, CompanyID)
-                )
-
-                return {'successful': True}
-            
             case "equipment":
                 EquipmentID = request.args['id']
                 EquipmentName = request.args['name']
@@ -356,6 +333,29 @@ def edit():
 
                 return {'succesful': True}
             
+            case "company":
+                CompanyID = request.args['id']
+                CompanyName = request.args['name']
+                Location = request.args['location']
+                Contact = request.args['contact']
+
+                # Fetch pre-exisitng data first if some queries are left empty
+                existing_data = mysql.queryGet(
+                    "SELECT CompanyName, Location, Contact FROM company WHERE CompanyID=%s",
+                    (CompanyID,)
+                )
+
+                CompanyName = existing_data['CompanyName'] if CompanyName == '' else CompanyName
+                Location = existing_data['Location'] if Location == '' else Location
+                Contact = existing_data['Contact'] if Contact == '' else Contact
+
+                mysql.querySet(
+                    "UPDATE company SET CompanyName=%s,Location=%s,Contact=%s WHERE CompanyID=%s",
+                    (CompanyName, Location, Contact, CompanyID)
+                )
+
+                return {'successful': True}
+            
             case _:
                 return jsonify({'Error': 404, 'Reason': f"Unknown parameter '{list(request.args.keys())[0]}'"})
 
@@ -364,16 +364,6 @@ def edit():
 def delete():
     if request.method == 'POST':
         match list(request.args.keys())[0]:
-            case "log":
-                AlertID = request.args['id']
-                
-                mysql.querySet(
-                    "DELETE FROM logs WHERE AlertID=%s",
-                    (AlertID,)
-                )
-
-                return {'successful': True}
-            
             case "company":
                 CompanyID = request.args['id']
 

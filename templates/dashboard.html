@@ -220,13 +220,13 @@
                 </div>
                 <div class="modal-footer" style="background-color: #fcdbbc; color: #442c12;">
                     <button type="button" class="btn btn-outline-dark rounded-pill" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger rounded-pill" id="confirmDeleteButton">Delete</button>
+                    <button type="button" class="btn btn-danger rounded-pill" id="confirmDeleteButton" onclick="onClickdeleteConfirmation();">Delete</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Edit Equipment Modal -->
+   <!-- Edit Equipment Modal -->
     <div class="modal fade" id="editEquipmentModal" tabindex="-1" aria-labelledby="editEquipmentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow rounded-4">
@@ -236,6 +236,10 @@
                 </div>
                 <div class="modal-body" style="background-color: #fcdbbc; color: #442c12;">
                     <form id="editEquipmentForm" action="javascript:void(0);">
+                        <div class="mb-3">
+                            <label for="editEquipmentID" class="form-label">Equipment ID</label>
+                            <input type="text" class="form-control" name="editEquipmentID" id="editEquipmentID" disabled>
+                        </div>
                         <div class="mb-3">
                             <label for="editEquipmentName" class="form-label">Equipment Name</label>
                             <input type="text" class="form-control" name="editEquipmentName" id="editEquipmentName" maxlength="30">
@@ -250,13 +254,13 @@
                         </div>
                         <div class="mb-3">
                             <label for="editCompanyID" class="form-label">Company ID</label>
-                            <select class="form-select" name="editCompanyID" id="editCompanyID" onfocus="populateCompanySelect();">
+                            <select class="form-select" name="editCompanyID" id="editCompanyID">
                                 <option value="" disabled>-- Select a CompanyID --</option>
                             </select>
                         </div>
                         <div class="d-flex justify-content-end gap-2">
                             <button type="button" class="btn btn-outline-dark rounded-pill" style="background-color: #fcdbbc; color: #442c12;" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn rounded-pill" style="background-color: #ffab5d; color: #442c12;" onclick="handleEditSubmit('Equipment');">Save Changes</button>
+                            <button type="button" class="btn rounded-pill" style="background-color: #ffab5d; color: #442c12;" onclick="onClickEditEquipment();">Save Changes</button>
                         </div>
                     </form>
                 </div>
@@ -275,6 +279,10 @@
                 <div class="modal-body" style="background-color: #fcdbbc; color: #442c12;">
                     <form id="editOperatorForm" action="javascript:void(0);">
                         <div class="mb-3">
+                            <label for="editOperatorID" class="form-label">Operator ID</label>
+                            <input type="text" class="form-control" name="editOperatorID" id="editOperatorID" disabled>
+                        </div>
+                        <div class="mb-3">
                             <label for="editOperatorName" class="form-label">Operator Name</label>
                             <input type="text" class="form-control" name="editOperatorName" id="editOperatorName" maxlength="30">
                         </div>
@@ -288,13 +296,13 @@
                         </div>
                         <div class="mb-3">
                             <label for="editCompanyID" class="form-label">Company ID</label>
-                            <select class="form-select" name="editCompanyID" id="editCompanyID" onfocus="populateCompanySelect();">
+                            <select class="form-select" name="editCompanyID" id="editCompanyID">
                                 <option value="" disabled>-- Select a CompanyID --</option>
                             </select>
                         </div>
                         <div class="d-flex justify-content-end gap-2">
                             <button type="button" class="btn btn-outline-dark rounded-pill" style="background-color: #fcdbbc; color: #442c12;" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn rounded-pill" style="background-color: #ffab5d; color: #442c12;" onclick="handleEditSubmit('Operator');">Save Changes</button>
+                            <button type="button" class="btn rounded-pill" style="background-color: #ffab5d; color: #442c12;" onclick="onClickEditOperator();">Save Changes</button>
                         </div>
                     </form>
                 </div>
@@ -313,6 +321,10 @@
                 <div class="modal-body" style="background-color: #fcdbbc; color: #442c12;">
                     <form id="editCompanyForm" action="javascript:void(0);">
                         <div class="mb-3">
+                            <label for="editCompanyID" class="form-label">Company ID</label>
+                            <input type="text" class="form-control" name="editCompanyID" id="editCompanyID" disabled>
+                        </div>
+                        <div class="mb-3">
                             <label for="editCompanyName" class="form-label">Company Name</label>
                             <input type="text" class="form-control" name="editCompanyName" id="editCompanyName" maxlength="30">
                         </div>
@@ -326,7 +338,7 @@
                         </div>
                         <div class="d-flex justify-content-end gap-2">
                             <button type="button" class="btn btn-outline-dark rounded-pill" style="background-color: #fcdbbc; color: #442c12;" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn rounded-pill" style="background-color: #ffab5d; color: #442c12;" onclick="handleEditSubmit('Company');">Save Changes</button>
+                            <button type="button" class="btn rounded-pill" style="background-color: #ffab5d; color: #442c12;" onclick="onClickEditCompany();">Save Changes</button>
                         </div>
                     </form>
                 </div>
@@ -452,5 +464,7 @@
 <script src="../static/js/animate_options.js"></script>
 <script src="../static/js/render_data.js"></script>
 <script src="../static/js/modal_add.js"></script>
+<script src="../static/js/modal_edit.js"></script>
+<script src="../static/js/modal_delete.js"></script>
 <script src="../static/js/modal_form_handler.js"></script>
 {% endblock scripts %}

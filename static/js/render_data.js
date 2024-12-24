@@ -46,8 +46,8 @@ async function populateLogsTable() {
 
 // Populate company options
 async function populateCompanySelect() {
-    const selectForms = document.getElementsByName('CompanyID');
-
+    const selectForms = document.querySelectorAll('select[name="CompanyID"], select[name="editCompanyID"]');
+    
     const results = await fetch(
         "/fetch?companies",
         {
@@ -59,11 +59,13 @@ async function populateCompanySelect() {
     ).then((res) => res.json());
 
     for (let selectForm of selectForms) {
+        // Keep the first option (placeholder)
         if (selectForm.children.length != 1) {
             let defaultOpt = selectForm.children[0];
             selectForm.innerHTML = null;
             selectForm.appendChild(defaultOpt);
         }
+        // Add company options
         for (let company of results) {
             let newOption = document.createElement('option');
             newOption.value = company['CompanyID'];
@@ -94,6 +96,12 @@ async function populateOperatorSelect(selectElement) {
 
 // Function to create action buttons
 function createActionButtons(type, data) {
+    switch(type){
+        case 'equipment': type = 'Equipment'; break;
+        case 'operator': type = 'Operator'; break;
+        case 'companie': type = 'Company'; break;
+    }
+
     const actionCell = document.createElement('td');
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'd-flex gap-2';
@@ -119,11 +127,11 @@ function createActionButtons(type, data) {
         
         // For company select fields
         if (form.querySelector('[name="editCompanyID"]')) {
-            populateCompanySelect();
             setTimeout(() => {
                 form.querySelector('[name="editCompanyID"]').value = data.CompanyID;
             }, 100);
         }
+        populateCompanySelect();
         
         // Store ID for submission
         form.dataset.id = data[`${type}ID`];
@@ -182,71 +190,60 @@ function createActionButtons(type, data) {
 
 // Render table entries asynchronously
 async function renderData(type) {
-    const results = await fetch(
-        "/fetch?" + type.replace('Content', ''),
-        {
+    try {
+        const contentDiv = document.getElementById(type);
+        if (!contentDiv) {
+            console.error(`Container ${type} not found`);
+            return;
+        }
+
+        const tbody = contentDiv.querySelector('tbody');
+        if (!tbody) {
+            console.error(`Table body not found in ${type}`);
+            return;
+        }
+
+        const response = await fetch(`/fetch?${type.replace('Content', '')}`, {
             method: "GET",
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const results = await response.json();
+
+        const orderedKeys = {
+            'equipmentsContent': ['EquipmentID', 'EquipmentName', 'PowerRating', 'ManufacturingDate', 'CompanyID'],
+            'operatorsContent': ['OperatorID', 'OperatorName', 'Occupation', 'PhoneNumber', 'CompanyName'],
+            'companiesContent': ['CompanyID', 'CompanyName', 'Location', 'Contact'],
+            'energyContent': ['EquipmentID', 'EquipmentName', 'EnergyConsumed']
+        };
+
+        if (!orderedKeys[type]) {
+            console.error(`Invalid content type: ${type}`);
+            return;
         }
-    ).then((res) => res.json());
 
-    const orderedKeys = {
-        'equipmentsContent': ['EquipmentID', 'EquipmentName', 'PowerRating', 'ManufacturingDate', 'CompanyID'],
-        'operatorsContent': ['OperatorID', 'OperatorName', 'Occupation', 'PhoneNumber', 'CompanyName'],
-        'companiesContent': ['CompanyID', 'CompanyName', 'Location', 'Contact'],
-        'energyContent': ['EquipmentID', 'EquipmentName', 'EnergyConsumed']
-    };
-
-    const parent = document.getElementById(type);
-    const table = parent.getElementsByTagName('tbody')[0];
-    table.innerHTML = '';
-
-    for (let object of results) {
-        const newRow = document.createElement('tr');
+        tbody.innerHTML = '';
         
-        for (let key of orderedKeys[type]) {
-            const newRowData = document.createElement('td');
-            newRowData.innerText = object[key];
-            newRow.appendChild(newRowData);
-        }
-
-        // Add action buttons for equipment, operator, and company tables
-        if (type !== 'energyContent') {
-            const entityType = type.replace('Content', '').replace(/s$/, '');
-            const actionCell = createActionButtons(entityType, object);
-            newRow.appendChild(actionCell);
-        }
-
-        // Add Use button for equipment entries
-        if (type === 'equipmentsContent') {
-            const useButton = document.createElement('button');
-            useButton.className = 'btn rounded-pill ms-2';
-            useButton.style.backgroundColor = '#ffab5d';
-            useButton.style.color = '#442c12';
-            useButton.textContent = 'Use';
+        results.forEach(object => {
+            if (!object) return;
             
-            useButton.addEventListener('click', async () => {
-                const modal = new bootstrap.Modal(document.getElementById('equipmentUsageModal'));
-                const form = document.getElementById('equipmentUsageForm');
-                const timeStamp = document.getElementById('timeStamp');
-                const equipmentNameSpan = document.getElementById('equipmentNameSpan');
-                const operatorSelect = document.getElementById('OperatorID');
-                
-                form.name = `equipmentUsageForm_${object.EquipmentID}`;
-                equipmentNameSpan.textContent = object.EquipmentName;
-                await populateOperatorSelect(operatorSelect);
-                
-                const now = new Date();
-                timeStamp.textContent = now.toLocaleString();
-                
-                modal.show();
+            const row = document.createElement('tr');
+            
+            orderedKeys[type].forEach(key => {
+                const cell = document.createElement('td');
+                cell.textContent = object[key] ?? '';
+                row.appendChild(cell);
             });
-            
-            newRow.lastChild.querySelector('div').appendChild(useButton);
-        }
 
-        table.appendChild(newRow);
+            if (type !== 'energyContent') {
+                const entityType = type.replace('Content', '').replace(/s$/, '');
+                row.appendChild(createActionButtons(entityType, object));
+            }
+
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Render error:', error);
+        createFlashMessage('Failed to load data', 'danger');
     }
 }
