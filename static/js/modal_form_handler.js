@@ -68,3 +68,9 @@ function createFlashMessage(message, type) {
     // Auto-remove after 5 seconds
     setTimeout(() => flash.remove(), 5000);
 }
+
+// Remove existing alerts when closing modal
+function onClickClearFormAlerts() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => alert.remove());
+}
